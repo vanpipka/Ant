@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Страница не найдена - 404{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-card">
+        <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+            <img src="logo.png" alt="Logo" height="30"> <!-- Логотип как на скрине -->
+            <span class="error-badge">Error 404</span>
+        </div>
+        
+        <h1 class="error-title">404</h1>
+        <h2 class="error-heading">We couldn't find that page</h2>
+        <p class="error-desc">The link may be outdated or the page may have moved. Try navigating from your workspace home.</p>
+        
+        <div class="d-flex justify-content-center gap-3">
+            <a href="/" class="btn-error-main">
+                <i class="bi bi-house"></i> Back Home
+            </a>
+            <button onclick="history.back()" class="btn-error-outline">
+                <i class="bi bi-arrow-left"></i> Go Back
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
