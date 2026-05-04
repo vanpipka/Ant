@@ -45,8 +45,8 @@ class OrderService:
             
             
     @staticmethod
-    def get_orders_for_user(user):
-        return get_mock_orders(user)
+    def get_orders_for_user(user, status=None, search_query=None):
+        return get_mock_orders(user, status, search_query)
         # return Order.objects.filter(client__in=user.clients.all()).order_by('-date_issued')
         
     @staticmethod
@@ -67,7 +67,7 @@ def mock_get_orders_for_user(user):
 from datetime import datetime, timedelta
 from django.utils import timezone
 
-def get_mock_orders(user):
+def get_mock_orders(user, status=None, search_query=None):
     # Берем первого доступного клиента пользователя
     client = user.clients.first()
     if not client:
@@ -75,7 +75,13 @@ def get_mock_orders(user):
 
     orders = []  
     for i in range(10):     
-        orders.append(create_random_order(user, client)) 
+        order = create_random_order(user, client)
+        if status and order.status != status:
+            continue  # Если фильтр по статусу задан и не совпало - пропускаем
+        if search_query and search_query.lower() not in order.external_id.lower():
+            continue  # Если фильтр по поиску задан и не совпало - пропускаем
+        
+        orders.append(order) 
   
     return orders
 

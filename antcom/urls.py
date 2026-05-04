@@ -12,11 +12,12 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/", include("accounts.urls")),
-    path("orders/", include("orders.urls")),
     path('test-400/', TemplateView.as_view(template_name='errors/400.html')),
     path('test-403/', TemplateView.as_view(template_name='errors/403.html')),
     path('test-404/', TemplateView.as_view(template_name='errors/404.html')),
     path('test-500/', TemplateView.as_view(template_name='errors/500.html')),
+    path("", include("orders.urls")),
+    
 ]
 
 if settings.DEBUG:

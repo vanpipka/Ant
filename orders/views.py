@@ -1,4 +1,5 @@
 from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseNotFound, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
@@ -8,7 +9,7 @@ from orders.models import Order
 from .services import OrderService
 
 
-class OrderListView(ListView):
+class OrderListView(LoginRequiredMixin, ListView):
     model = Order
     template_name = 'orders/order_list.html' # Путь к вашему шаблону
     context_object_name = 'orders'
@@ -18,9 +19,13 @@ class OrderListView(ListView):
         # 1. Получаем всех клиентов, к которым привязан текущий юзер
         # user_clients = self.request.user.clients.all()
         
+        # Получаем параметры фильтрации
+        status_filter = self.request.GET.get('status')
+        search_query = self.request.GET.get('q')
+        
         # 2. Фильтруем заказы только этих клиентов
         # Предполагаем, что в модели Order есть ForeignKey на Client
-        orders = OrderService.get_orders_for_user(self.request.user)
+        orders = OrderService.get_orders_for_user(self.request.user, status=status_filter, search_query=search_query)
         return orders # Сортируем по дате, новые сверху
 
     def get_context_data(self, **kwargs):
@@ -28,6 +33,9 @@ class OrderListView(ListView):
         clients = self.request.user.clients.all()  
         
         context['clients'] = clients
+        context['order_statuses'] = Order.Status.choices
+        context['current_status'] = self.request.GET.get('status', '')
+        context['search_query'] = self.request.GET.get('q', '')
         
         # Добавляем инфо о количестве для футера (как на макете)
         context['total_count'] = len(self.get_queryset())

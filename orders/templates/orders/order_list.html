@@ -1,25 +1,31 @@
 {% extends 'base.html' %}
 
-{% block title %}Неверный запрос - 400{% endblock %}
+{% block title %}Список заказов{% endblock %}
 
 {% block content %}
 <div class="main-container">
         <!-- Toolbar -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <button data-url="{% url 'order_modal_create' %}" class="btn btn-new-invoice open-order-modal">
-                <i class="bi bi-plus fs-4 me-1"></i> Новый заказ
+            <button data-url="{% url 'order_modal_create' %}" class="btn btn-sm btn-new-invoice open-order-modal">
+                <i class="bi bi-plus"></i> Новый заказ
             </button>
             
-            <div class="d-flex gap-2">
-                <div class="search-container">
-                    <i class="bi bi-search"></i>
-                    <input type="text" class="form-control search-input" placeholder="Search invoice, client, amount...">
-                </div>
-                <select class="form-select status-select">
-                    <option selected>All Status</option>
-                    <option>Paid</option>
-                    <option>Pending</option>
-                </select>
+            <div >
+                <form method="GET" id="filter-form" class="d-flex gap-2">
+                    <div class="search-container">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="search-input" name="q" value="{{ search_query }}" class="form-control search-input" placeholder="Поиск...">
+                    </div>
+
+                    <select class="form-select status-select" id="status-select" name="status">
+                        <option value="">Все статусы</option>
+                        {% for value, label in order_statuses %}
+                            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
             </div>
         </div>
 
@@ -44,7 +50,7 @@
                             <td class="text-muted small">{{order.created_at | date:"M d, Y"}}</td>
                             <td class="amount-cell">{{order.total_amount|floatformat:2}}₽</td>
                             <td class="count-cell">{{order.tems.count}}</td>
-                            <td><span class="badge-custom status-{{ order.get_status_class }}">{{order.status}}</span></td>
+                            <td><span class="badge-custom status-{{ order.get_status_class }}">{{order.get_status_display}}</span></td>
                             <td class="text-muted small">{{order.address}}</td>
                             <td class="text-end">
                                 <a href="{% url 'order_modal' order.id %}" class="open-order-modal">

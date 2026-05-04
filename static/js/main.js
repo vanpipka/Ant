@@ -271,3 +271,32 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const filterForm = document.getElementById('filter-form');
+
+    if (!filterForm) return;
+    
+    const statusSelect = document.getElementById('status-select');
+    const searchInput = document.getElementById('search-input');
+    
+    // 1. Статус изменили — сразу отправляем
+    statusSelect.addEventListener('change', () => filterForm.submit());
+
+    // 2. Поиск с задержкой (Debounce)
+    let timeout = null;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            filterForm.submit();
+        }, 600); // Обновит через 0.6 сек после того, как пользователь замолчит
+    });
+    
+    // Фокус в конец строки при вводе (чтобы курсор не прыгал при обновлении страницы)
+    if (searchInput.value) {
+        searchInput.focus();
+        const val = searchInput.value;
+        searchInput.value = '';
+        searchInput.value = val;
+    }
+});

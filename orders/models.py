@@ -2,12 +2,13 @@ from django.db import models
 
 
 class Order(models.Model):
+    
     class Status(models.TextChoices):
-        DRAFT = "Черновик"
-        SENT = "Отправлен"
-        CONFIRMED = "Подтвержден"
-        REJECTED = "Отклонен"
-        DONE = "Выполнен"
+        DRAFT = "draft", "Черновик"
+        SENT = "sent", "Отправлен"
+        CONFIRMED = "confirmed", "Подтвержден"
+        REJECTED = "rejected", "Отклонен"
+        DONE = "done", "Выполнен"
 
     external_id = models.CharField(max_length=64, null=True, blank=True)  # ID из 1С
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=True, blank=True)

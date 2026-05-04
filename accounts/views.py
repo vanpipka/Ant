@@ -17,7 +17,7 @@ def login_view(request):
                 return redirect("login")
 
             login(request, user)
-            return redirect("dashboard")
+            return redirect("order_list")
 
         messages.error(request, "Неверные данные")
 
