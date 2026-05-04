@@ -273,3 +273,80 @@ body {
             border-color: var(--primary-teal);
             color: white;
         }
+
+        /* Статистика сверху */
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px 20px;
+    border: 1px solid #eef2f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.stats-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+/* Форма заказа */
+.invoice-container {
+    background: white;
+    border-radius: 16px;
+    /*padding: 40px;*/
+    box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+}
+
+.qty-control {
+    display: flex;
+    border: 1px solid #14a49a;
+    border-radius: 6px;
+    overflow: hidden;
+    max-width: 100px;
+}
+.qty-btn {
+    background: #14a49a;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.qty-input {
+    width: 40px;
+    border: none;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.totals-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+.totals-table {
+    min-width: 300px;
+}
+.totals-table td {
+    padding: 8px 0;
+    color: #64748b;
+}
+.text-danger-custom { color: #ef4444; }
+.text-success-custom { color: #14a49a; }
+
+.trash-btn {
+    cursor: pointer;
+    color: #94a3b8;
+    transition: color 0.2s;
+}
+.trash-btn:hover {
+    color: #ef4444; /* Красный при наведении */
+}

@@ -6,8 +6,8 @@
 <div class="main-container">
         <!-- Toolbar -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <button class="btn btn-new-invoice d-flex align-items-center">
-                <i class="bi bi-plus fs-4 me-1"></i> New Invoice
+            <button data-url="{% url 'order_modal_create' %}" class="btn btn-new-invoice open-order-modal">
+                <i class="bi bi-plus fs-4 me-1"></i> Новый заказ
             </button>
             
             <div class="d-flex gap-2">
@@ -31,7 +31,7 @@
                         <th>Номер</th>
                         <th>Дата</th>
                         <th>Сумма</th>
-                        <th>Товаров</th>
+                        <th>Товары</th>
                         <th>Статус</th>
                         <th>Адрес</th>
                         <th class="text-end">Actions</th>
@@ -40,15 +40,16 @@
                 <tbody>
                     {% for order in orders %} 
                         <tr>
-                            <td><a href="#" class="invoice-id">{{order.number}}</a></td>
-                            <td class="text-muted small">{{order.date_issued | date:"M d, Y"}}</td>
-                            <td class="amount-cell">${{order.amount|floatformat:2}}</td>
+                            <td><a href="#" class="invoice-id">{{order.external_id}}</a></td>
+                            <td class="text-muted small">{{order.created_at | date:"M d, Y"}}</td>
+                            <td class="amount-cell">{{order.total_amount|floatformat:2}}₽</td>
+                            <td class="count-cell">{{order.tems.count}}</td>
                             <td><span class="badge-custom status-{{ order.get_status_class }}">{{order.status}}</span></td>
                             <td class="text-muted small">{{order.address}}</td>
                             <td class="text-end">
-                                <i class="bi bi-eye action-btn"></i>
-                                <i class="bi bi-download action-btn"></i>
-                                <i class="bi bi-three-dots action-btn"></i>
+                                <a href="{% url 'order_modal' order.id %}" class="open-order-modal">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -85,6 +86,11 @@
             </ul>
         </nav>
     </div>
+
+
+<!-- Modal -->
+{% include 'includes/base_modal.html' %}
+
 {% endblock %}
 
 

@@ -1,0 +1,167 @@
+
+      <div class="modal-header">
+            <div class="text-start">
+                <h3 class="fw-bold mb-0  id="orderModalLabel">ЗАКАЗ</h3>
+                <small class="text-muted">{{order.number}}</small>
+            </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+            <div class="container py-4">
+                <!-- Top Stats -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <div>
+                                <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Total</small>
+                                <h4 class="mb-0 fw-bold" id="total-amount">{{order.total_amount}}</h4>
+                            </div>
+                            <div class="stats-icon" style="background: #e6f7f4; color: #14a49a;"><i class="bi bi-wallet2"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <div>
+                                <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Paid</small>
+                                <h4 class="mb-0 fw-bold"></h4>
+                            </div>
+                            <div class="stats-icon" style="background: #f0fdf4; color: #16a34a;"><i class="bi bi-check-circle"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <div>
+                                <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Status</small>
+                                <h4 class="mb-0 fw-bold">{{order.status}}</h4>
+                            </div>
+                            <div class="stats-icon" style="background: #fef2f2; color: #ef4444;"><i class="bi bi-shield-check"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Invoice Form -->
+                <div class="invoice-container">
+                
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <select id = "client-select" class="form-select py-3 bg-light border-0" style="border-radius: 12px;">
+                                    <option selected disabled>Выберите получателя</option>
+                                    {% for client in clients %}
+                                        <option value="{{ client.id }}">{{ client.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <select id="address-select" class="form-select py-3 bg-light border-0" disabled>
+                                    <option value="" selected disabled>Сначала выберите клиента</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead class="bg-light">
+                                    <tr class="text-uppercase text-muted small fw-bold">
+                                        <th class="border-0 py-3">Товар</th>
+                                        <th class="border-0 py-3 text-center">Количество</th>
+                                        <th class="border-0 py-3 text-end">Цена</th>
+                                        <th class="border-0 py-3 text-end">Сумма</th>
+                                        <th class="text-end">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="order-items-container">
+                                    <!-- Item 1 -->
+
+                                    
+                                    {% for item in items %}
+                                    <tr class="order-row">
+                                        <td class="py-4">
+                                            <div class="fw-bold">Website Design & Development</div>
+                                            <small class="text-muted">{{item.name}}</small>
+                                            <input type="hidden" name="product_id" value="{{item.id}}">
+                                        </td>
+                                        <td>
+                                            <div class="qty-control mx-auto">
+                                                <button type="button" class="qty-btn">-</button>
+                                                <input type="text" class="qty-input" value="{{item.quantity}}">
+                                                <button type="button" class="qty-btn">+</button>
+                                            </div>
+                                        </td>
+                                        <td class="text-end fw-bold text-muted order-unit-price">{{item.price}}₽</td>
+                                        <td class="text-end fw-bold order-unit-amount">₽</td>
+                                        <td class="text-end">
+                                            <i class="bi bi-trash trash-btn"></i>
+                                        </td>
+                                    </tr>    
+                                    {% endfor %}
+
+                                    <tfoot class="border-top-0">
+                                        <tr>
+                                            <!-- colspan="5" чтобы растянуть ячейку на всю ширину таблицы -->
+                                            <td colspan="5" class="text-center py-4">
+                                                <button type="button" 
+                                                        class="btn btn-link fw-bold text-decoration-none shadow-none" 
+                                                        id="add-item-btn"
+                                                        style="color: var(--primary-teal);">
+                                                    <i class="bi bi-plus-lg me-1"></i> Добавить позицию
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                        
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Totals
+                        <div class="totals-row">
+                            <table class="totals-table">
+                                <tr>
+                                    <td class="pt-3 fw-bold text-dark fs-5">Total</td>
+                                    <td class="pt-3 text-end fw-bold text-dark fs-5" id="total-amount">0.00₽</td>
+                                </tr>
+                            </table>
+                        </div>
+                         -->
+
+                        <div class="mt-5 pt-4"> <!-- border-top">-->
+                            <h6 class="text-uppercase fw-bold small text-muted">Notes</h6>
+                            <p class="text-muted small">Thank you for your business. If you have any questions about this invoice, contact our billing team.</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        <button type="button" class="btn btn-primary">Сохранить</button>
+      </div>
+
+
+
+
+<div class="modal fade" id="productPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Выберите товар</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Поиск -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" id="product-search-input" class="form-control" placeholder="Поиск по наименованию...">
+                </div>
+                <!-- Список товаров -->
+                <div class="list-group" id="product-list-results" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Сюда JS вставит товары -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
