@@ -18,6 +18,17 @@ class Order(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+       
+    def get_status_class(self):
+        mapping = {
+            self.Status.DRAFT: "draft",
+            self.Status.SENT: "pending",     # 'pending' из нашего CSS
+            self.Status.CONFIRMED: "paid",    # 'paid' (зеленый) для подтвержденных
+            self.Status.REJECTED: "overdue",  # 'overdue' (красный) для отклоненных
+            self.Status.DONE: "paid",         # тоже зеленый
+        }
+        # Если статус не найден в словаре, вернем 'draft' по умолчанию
+        return mapping.get(self.status, "draft")
     
     
 class OrderItem(models.Model):

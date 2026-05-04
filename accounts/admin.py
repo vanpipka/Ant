@@ -1,18 +1,21 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import User, Client
 
+@admin.register(Client)
+class ClientAdmin(admin.ModelAdmin):
+    list_display = ('name', 'external_id', 'created_at')
+    search_fields = ('name',)
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    model = User
-
-    list_display = ("email", "client", "is_active", "is_staff")
-    search_fields = ("email", "client__name")
-    ordering = ("email",)
+    list_display = ('email', 'username', 'is_staff')
+    
+    # Это добавит удобный интерфейс выбора клиентов
+    filter_horizontal = ('clients',) 
 
     fieldsets = UserAdmin.fieldsets + (
-        ("Custom fields", {
-            "fields": ("external_id", "client")
+        ('Доступы', {
+            'fields': ('clients', 'external_id'),
         }),
     )
