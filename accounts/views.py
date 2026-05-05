@@ -2,11 +2,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect
+from django.db import transaction
 from django.http import JsonResponse
 from django.contrib import messages
 import json
 
-from accounts.models import User
+from accounts.models import Client, ClientAddress, User
 
 
 def login_view(request):
@@ -51,13 +52,14 @@ def create_user_api(request):
             data = json.loads(request.body)
 
         username = data.get('username')
+        external_id = data.get('external_id')
         email = data.get('email')
         password = data.get('password')
 
         if User.objects.filter(username=username).exists():
-            return JsonResponse({'success': False, 'error': 'Пользователь с таким логином уже существует'}, status=400)
+            return JsonResponse({'success': False, 'error': f'user with username {username} exists'}, status=400)
 
-        user = User.objects.create_user(username=username, email=email, password=password)
+        user = User.objects.create_user(username=username, email=email, password=password, external_id=external_id)
         
         # Можно сразу добавить доп. поля (Имя, Фамилия)
         user.first_name = data.get('first_name', '')
@@ -69,26 +71,66 @@ def create_user_api(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-@login_required
 @require_POST
 def update_user_api(request):
-    """Обновление данных текущего пользователя"""
     try:
-        user = request.user
-        data = request.POST if request.POST else json.loads(request.body)
-
-        # Обновляем основные поля
-        user.first_name = data.get('first_name', user.first_name)
-        user.last_name = data.get('last_name', user.last_name)
-        user.email = data.get('email', user.email)
+        data = json.loads(request.body)
         
-        # Если нужно сменить пароль (простая реализация)
-        new_password = data.get('password')
-        if new_password:
-            user.set_password(new_password)
-            
-        user.save()
+        # 1. Извлекаем данные пользователя
+        user_data = data.get('user', {})
+        user_ext_id = user_data.get('external_id')
+        
+        if not user_ext_id:
+            return JsonResponse({'success': False, 'error': 'external_id пользователя обязателен'}, status=400)
 
-        return JsonResponse({'success': True, 'message': 'Данные успешно обновлены'})
+        # Используем транзакцию, чтобы если упадет один адрес, не создался "битый" юзер
+        with transaction.atomic():
+            # 2. Обновляем или создаем пользователя
+            user, u_created = User.objects.update_or_create(
+                external_id=user_ext_id,
+                defaults={
+                    'username': user_data.get('username', user_data.get('email')),
+                    'email': user_data.get('email'),
+                    'first_name': user_data.get('first_name', ''),
+                    'last_name': user_data.get('last_name', ''),
+                }
+            )
+
+            # Если пользователь новый и нет пароля — ставим заглушку (потом сменит)
+            if u_created and 'password' in user_data:
+                user.set_password(user_data['password'])
+                user.save()
+
+            # 3. Обработка списка клиентов
+            client_list = data.get('clients', [])
+            current_client_ids = []
+
+            for cl_data in client_list:
+                cl_ext_id = cl_data.get('external_id')
+                client, _ = Client.objects.update_or_create(
+                    external_id=cl_ext_id,
+                    defaults={'name': cl_data.get('name')}
+                )
+                current_client_ids.append(client.id)
+
+                # 4. Обработка адресов клиента
+                address_list = cl_data.get('addresses', [])
+                for addr_data in address_list:
+                    ClientAddress.objects.update_or_create(
+                        external_id=addr_data.get('external_id'),
+                        defaults={
+                            'client': client,
+                            'address_line': addr_data.get('address_line')
+                        }
+                    )
+
+            # 5. Синхронизируем связи ManyToMany (set заменяет старый список новым)
+            user.clients.set(current_client_ids)
+
+        return JsonResponse({
+            'success': True, 
+            'message': f'Данные пользователя {user.email} и его клиентов синхронизированы'
+        })
+
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
