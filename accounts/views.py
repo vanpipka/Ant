@@ -129,6 +129,7 @@ def update_user_api(request):
 
         return JsonResponse({
             'success': True, 
+            'user_id': user.id,
             'message': f'Данные пользователя {user.email} и его клиентов синхронизированы'
         })
 
