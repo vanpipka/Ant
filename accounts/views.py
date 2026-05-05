@@ -117,7 +117,7 @@ def update_user_api(request):
                 address_list = cl_data.get('addresses', [])
                 for addr_data in address_list:
                     ClientAddress.objects.update_or_create(
-                        external_id=addr_data.get('external_id'),
+                        address_line=addr_data.get('address_line'),
                         defaults={
                             'client': client,
                             'address_line': addr_data.get('address_line')
