@@ -128,4 +128,4 @@ STATICFILES_DIRS = [
 ]
 
 # Папка, куда соберется вся статика при команде collectstatic (для продакшена)
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
