@@ -6,6 +6,8 @@ from django.shortcuts import render
 from django.urls import path, include
 from django.contrib import admin
 from django.views.generic import TemplateView
+from accounts import views as accounts_views
+from orders import views as order_views
 
 
 
@@ -16,6 +18,12 @@ urlpatterns = [
     path('test-403/', TemplateView.as_view(template_name='errors/403.html')),
     path('test-404/', TemplateView.as_view(template_name='errors/404.html')),
     path('test-500/', TemplateView.as_view(template_name='errors/500.html')),
+    
+    path('api/users/create/', accounts_views.create_user_api, name='user_create_api'),
+    path('api/users/update/', accounts_views.update_user_api, name='user_update_api'),
+    path('api/orders/addresses/', order_views.get_addresses, name='api_get_addresses'),
+    path('api/orders/products/', order_views.product_search_api, name='product_search_api'),
+    
     path("", include("orders.urls")),
     
 ]
