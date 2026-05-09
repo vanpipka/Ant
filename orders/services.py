@@ -1,3 +1,5 @@
+from django.db.models import Q
+from datetime import datetime
 from decimal import Decimal
 import random
 
@@ -47,7 +49,12 @@ class OrderService:
     @staticmethod
     def get_orders_for_user(user, status=None, search_query=None):
         # return get_mock_orders(user, status, search_query)
-        return Order.objects.filter(client__in=user.clients.all()).order_by('-created_at')
+        query = Order.objects.filter(client__in=user.clients.all())
+        if status:
+            query = query.filter(status=status)
+        if search_query:
+            query = query.filter(Q(number__icontains=search_query) | Q(id__icontains=search_query))
+        return query.order_by('-created_at')
         
     @staticmethod
     def get_order_for_user(user, id):
@@ -103,7 +110,7 @@ def create_random_order(user, client):
         user=user,
         client=client,
         external_id=f'#ORD-2026-{random.randint(100, 999)}',
-        created_at=timezone.now() - timedelta(days=random.randint(1, 30)),
+        created_at= datetime.now(),
         total_amount=random.uniform(100.0, 10000.0),
         status=random.choice(Order.Status.values),
         address=random.choice(addresses)

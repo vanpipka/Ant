@@ -66,8 +66,12 @@ def order_modal_handler(request, pk=None):
         'order': order,
         'items': order.items.all() if order.id else order.mock_items,
         'clients': request.user.clients.all(),
+        'addresses': [],
         'is_edit': pk is not None,
     }
+    
+    if order.client_id:
+        context['addresses'] = ClientAddress.objects.filter(client=order.client)
     
     # Возвращаем только внутреннюю часть формы
     return render(request, 'orders/partials/order_form_inner.html', context)

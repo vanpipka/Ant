@@ -46,7 +46,11 @@
                 <tbody>
                     {% for order in orders %} 
                         <tr>
-                            <td><a href="#" class="invoice-id">{{order.external_id}}</a></td>
+                            {% if order.number %}
+                                <td><a href="#" class="invoice-id">{{order.number}}</a></td>
+                            {% else %}
+                                <td><a href="#" class="invoice-id">{{order.id}} (не выгружен)</a></td>
+                            {% endif %}
                             <td class="text-muted small">{{order.created_at | date:"M d, Y"}}</td>
                             <td class="amount-cell">{{order.total_amount|floatformat:2}}₽</td>
                             <td class="count-cell">{{order.tems.count}}</td>

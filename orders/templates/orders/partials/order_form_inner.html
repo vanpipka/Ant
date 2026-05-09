@@ -48,9 +48,9 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <select id = "client-select" class="form-select py-3 bg-light border-0" style="border-radius: 12px;">
-                                    <option disabled>Выберите получателя</option>
+                                    <option disabled {% if not order.client_id %} selected {% endif %}>Выберите получателя</option>
                                     {% for client in clients %}
-                                        {% if client.id %} == order.client.id %}
+                                        {% if client.id == order.client_id %}
                                             <option value="{{ client.id }}" selected>{{ client.name }}</option>
                                         {% else %}
                                             <option value="{{ client.id }}">{{ client.name }}</option>
@@ -59,9 +59,31 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <select id="address-select" class="form-select py-3 bg-light border-0" disabled>
-                                    <option value="" selected disabled>Сначала выберите клиента</option>
-                                </select>
+                                {% if addresses %}
+                                    <select id="address-select" class="form-select py-3 bg-light border-0">  
+                                    
+                                        {% if not order.address in addresses %}
+                                            <option value="{{ order.address }}">{{ order.address }}</option>
+                                        {% endif %}
+                                        {% for i in addresses  %}
+                                            {% if i.address_line == order.address %}
+                                                <option value="{{ order.address }}" selected>{{ order.address }}</option>
+                                            {% else %}
+                                                <option value="{{ i.address_line }}">{{ i.address_line }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                            
+                                    </select>
+                                {% else %}                            
+                                    <select id="address-select" class="form-select py-3 bg-light border-0"                                     
+                                        {% if not order.client.id %} disabled {% endif %}>
+                                        {% if order.address %}
+                                            <option value="{{ order.address }}" selected>{{ order.address }}</option>
+                                        {% else %}
+                                            <option value="" selected disabled>Сначала выберите клиента</option>
+                                        {% endif %}
+                                    </select>
+                                {% endif %}
                             </div>
                         </div>
 
