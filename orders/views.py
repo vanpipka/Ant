@@ -1,12 +1,21 @@
 from django.views.generic import ListView
+from django.views.decorators.http import require_POST
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseNotFound, JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
+from decimal import Decimal
+from django.db import transaction
 
+import json
+
+from accounts.models import Client
 from accounts.models import ClientAddress
-from orders.models import Order
+from orders.models import Order, OrderItem
 from .services import OrderService
+
+User = get_user_model()
 
 
 class OrderListView(LoginRequiredMixin, ListView):
@@ -106,3 +115,73 @@ def product_search_api(request):
         })
      
     return JsonResponse(data, safe=False)
+
+
+@require_POST
+def set_order_full(request):
+    try:
+        data = json.loads(request.body)
+        
+        # 1. Извлекаем основные данные заказа
+        order_ext_id = data.get('external_id')
+        user_ext_id = data.get('user_external_id')
+        client_ext_id = data.get('client_external_id')
+        
+        if not all([order_ext_id, client_ext_id]):
+            return JsonResponse({'success': False, 'error': 'Отсутствует external_id заказа или клиента'}, status=400)
+
+        with transaction.atomic():
+            # 2. Ищем пользователя и клиента (обязательные связи)
+            try:
+                client = Client.objects.get(external_id=client_ext_id)
+            except Client.DoesNotExist:
+                return JsonResponse({'success': False, 'error': f'Клиент {client_ext_id} не найден'}, status=404)
+            
+            # Пользователь может быть не указан (например, прямой заказ в 1С)
+            user = User.objects.filter(external_id=user_ext_id).first() if user_ext_id else None
+
+            # 3. Создаем или обновляем шапку заказа
+            order, created = Order.objects.update_or_create(
+                external_id=order_ext_id,
+                defaults={
+                    'user': user,
+                    'client': client,
+                    'number': data.get('number', ''),
+                    'address': data.get('address', ''),
+                    'status': data.get('status', Order.Status.DRAFT),
+                    'total_amount': Decimal(str(data.get('total_amount', 0))),
+                }
+            )
+
+            # 4. Обновляем табличную часть (позиции)
+            # Чтобы не усложнять сопоставление строк, проще всего удалить старые и записать новые
+            order.items.all().delete()
+
+            items_data = data.get('items', [])
+            order_items = []
+            
+            for item in items_data:
+                # Рассчитываем total для строки, если он не пришел из 1С
+                quantity = int(item.get('quantity', 0))
+                price = Decimal(str(item.get('price', 0)))
+                item_total = Decimal(str(item.get('total', quantity * price)))
+
+                order_items.append(OrderItem(
+                    order=order,
+                    product_id=item.get('product_id'),
+                    name=item.get('name'),
+                    quantity=quantity,
+                    price=price,
+                    total=item_total
+                ))
+            
+            # Массовое создание строк (быстрее, чем по одной)
+            OrderItem.objects.bulk_create(order_items)
+
+        return JsonResponse({
+            'success': True, 
+            'message': f'Заказ {order_ext_id} успешно {"создан" if created else "обновлен"}'
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

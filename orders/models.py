@@ -11,6 +11,7 @@ class Order(models.Model):
         DONE = "done", "Выполнен"
 
     external_id = models.CharField(max_length=64, null=True, blank=True)  # ID из 1С
+    number = models.CharField(max_length=15, null=True, blank=True, default="")  # number из 1С
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=True, blank=True)
     client = models.ForeignKey("accounts.Client", on_delete=models.CASCADE)
     address = models.CharField(max_length=255, default="")
