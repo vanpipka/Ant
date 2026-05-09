@@ -180,6 +180,7 @@ def set_order_full(request):
 
         return JsonResponse({
             'success': True, 
+            'order_id': order.id,
             'message': f'Заказ {order_ext_id} успешно {"создан" if created else "обновлен"}'
         })
 
