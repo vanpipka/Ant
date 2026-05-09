@@ -46,13 +46,16 @@ class OrderService:
             
     @staticmethod
     def get_orders_for_user(user, status=None, search_query=None):
-        return get_mock_orders(user, status, search_query)
-        # return Order.objects.filter(client__in=user.clients.all()).order_by('-date_issued')
+        # return get_mock_orders(user, status, search_query)
+        return Order.objects.filter(client__in=user.clients.all()).order_by('-created_at')
         
     @staticmethod
     def get_order_for_user(user, id):
-        return get_mock_order(user, id)
-        # return Order.objects.filter(client__in=user.clients.all()).order_by('-date_issued')    
+        # return get_mock_order(user, id)
+        
+        return Order.objects.filter(id=id)[0]
+        
+        # return Order.objects.filter(client__in=user.clients.all()).order_by('-created_at')    
             
 def get_status_from_1c(external_id):
     return "Подтвержден"  # Заглушка, в реальной жизни - HTTP запрос к 1С
@@ -62,10 +65,6 @@ def send_to_1c(payload):
         "external_id": "1C123456"
     }  # Заглушка, в реальной жизни - HTTP запрос к 1С
     
-def mock_get_orders_for_user(user):
-    import random
-from datetime import datetime, timedelta
-from django.utils import timezone
 
 def get_mock_orders(user, status=None, search_query=None):
     # Берем первого доступного клиента пользователя
