@@ -48,9 +48,13 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <select id = "client-select" class="form-select py-3 bg-light border-0" style="border-radius: 12px;">
-                                    <option selected disabled>Выберите получателя</option>
+                                    <option disabled>Выберите получателя</option>
                                     {% for client in clients %}
-                                        <option value="{{ client.id }}">{{ client.name }}</option>
+                                        {% if client.id %} == order.client.id %}
+                                            <option value="{{ client.id }}" selected>{{ client.name }}</option>
+                                        {% else %}
+                                            <option value="{{ client.id }}">{{ client.name }}</option>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                             </div>
