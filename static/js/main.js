@@ -49,7 +49,7 @@ async function loadProducts(query = '') {
 
     try {
         // Замените URL на ваш эндпоинт, который отдает JSON товаров
-        const response = await fetch(`/api/orders/products/?q=${query}`);
+        const response = await fetch(`/api/products/search/?q=${query}`);
         const products = await response.json();
 
         listContainer.innerHTML = '';

@@ -70,13 +70,13 @@ class OrderItemAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     # Поля, которые будут отображаться в списке товаров
-    list_display = ('product_id', 'name', 'user', 'price')
+    list_display = ('product_id', 'name', 'client', 'price')
     
     # Поля, по которым можно кликнуть для перехода к редактированию
     list_display_links = ('product_id', 'name')
     
     # Фильтры в правой колонке (очень полезно, если клиентов много)
-    list_filter = ('user',)
+    list_filter = ('client',)
     
     # Поиск по названию, внутреннему ID и имени клиента (через __name)
     search_fields = ('name', 'product_id', 'client__name')
@@ -85,12 +85,12 @@ class ProductAdmin(admin.ModelAdmin):
     list_editable = ('price',)
     
     # Упорядочивание по умолчанию
-    ordering = ('user', 'name')
+    ordering = ('client', 'name')
     
     # Группировка полей в самой карточке товара
     fieldsets = (
         ('Основная информация', {
-            'fields': ('user', 'name', 'product_id')
+            'fields': ('client', 'name', 'product_id')
         }),
         ('Ценообразование', {
             'fields': ('price',),
@@ -98,4 +98,4 @@ class ProductAdmin(admin.ModelAdmin):
     )
 
     # Опционально: если вы хотите ускорить выбор клиента (если их тысячи)
-    raw_id_fields = ('user',)
+    raw_id_fields = ('client',)

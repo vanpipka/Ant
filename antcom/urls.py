@@ -22,8 +22,9 @@ urlpatterns = [
     path('api/users/create/', accounts_views.create_user_api, name='user_create_api'),
     path('api/users/update/', accounts_views.update_user_api, name='user_update_api'),
     path('api/orders/addresses/', order_views.get_addresses, name='api_get_addresses'),
-    path('api/orders/products/', order_views.product_search_api, name='product_search_api'),
     path('api/orders/update/', order_views.set_order_full, name='order_update_api'),
+    path('api/products/update/', order_views.set_products_full, name='product_search_api'),
+    path('api/products/search', order_views.product_search_api, name='product_search_api'),
     
     path("", include("orders.urls")),
     

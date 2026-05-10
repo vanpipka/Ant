@@ -1,6 +1,6 @@
 from django.db import models
 
-from accounts.models import User
+from accounts.models import Client
 
 
 class Order(models.Model):
@@ -59,8 +59,8 @@ class OrderItem(models.Model):
 
 
 class Product(models.Model):
-    user = models.ForeignKey(User, related_name="products", on_delete=models.CASCADE)
-
+    
+    client = models.ForeignKey(Client, related_name="products", on_delete=models.CASCADE, null=True, blank=True)
     product_id = models.CharField(max_length=64)
     name = models.CharField(max_length=255)
     
