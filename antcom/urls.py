@@ -24,7 +24,7 @@ urlpatterns = [
     path('api/orders/addresses/', order_views.get_addresses, name='api_get_addresses'),
     path('api/orders/update/', order_views.set_order_full, name='order_update_api'),
     path('api/products/update/', order_views.set_products_full, name='product_search_api'),
-    path('api/products/search', order_views.product_search_api, name='product_search_api'),
+    path('api/products/search/', order_views.product_search_api, name='product_search_api'),
     
     path("", include("orders.urls")),
     
