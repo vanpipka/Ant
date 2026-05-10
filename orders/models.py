@@ -37,8 +37,8 @@ class Order(models.Model):
     def get_status_class(self):
         mapping = {
             self.Status.DRAFT: "draft",
-            self.Status.SENT: "pending",     # 'pending' из нашего CSS
-            self.Status.CONFIRMED: "paid",    # 'paid' (зеленый) для подтвержденных
+            self.Status.SENT: "draft",     # 'pending' из нашего CSS
+            self.Status.CONFIRMED: "pending",    # 'paid' (зеленый) для подтвержденных
             self.Status.REJECTED: "overdue",  # 'overdue' (красный) для отклоненных
             self.Status.DONE: "paid",         # тоже зеленый
         }
