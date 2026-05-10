@@ -89,9 +89,10 @@ def get_addresses(request):
 def product_search_api(request):
     
     query = request.GET.get('q', '').strip().lower()
+    client_id = request.GET.get('client_id', '').strip().lower()
     
     # Базовый кверисет активных товаров
-    products = Product.objects.filter()
+    products = Product.objects.filter(client_id=client_id)
     
     if query:
     # Ищем по имени или по артикулу (product_id)

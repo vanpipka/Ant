@@ -45,11 +45,12 @@ const updateInvoiceTotals = () => {
 // Функция загрузки и фильтрации товаров
 async function loadProducts(query = '') {
     const listContainer = document.getElementById('product-list-results');
+    const clientId = document.getElementById('client-select').value;
     listContainer.innerHTML = '<div class="text-center p-3"><div class="spinner-border spinner-border-sm"></div></div>';
 
     try {
         // Замените URL на ваш эндпоинт, который отдает JSON товаров
-        const response = await fetch(`/api/products/search/?q=${query}`);
+        const response = await fetch(`/api/products/search/?client_id=${clientId}&q=${query}`);
         const products = await response.json();
 
         listContainer.innerHTML = '';
@@ -246,7 +247,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Делегирование: слушаем клики по кнопкам "Создать" или "Редактировать"
     document.addEventListener('click', function(e) {
 
-        console.log('Клик по элементу:', e.target);
         const btn = e.target.closest('.open-order-modal');
         if (btn) {
             e.preventDefault();
