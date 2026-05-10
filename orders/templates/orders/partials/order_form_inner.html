@@ -47,42 +47,54 @@
                         {% csrf_token %}
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <select id = "client-select" class="form-select py-3 bg-light border-0" style="border-radius: 12px;">
-                                    <option disabled {% if not order.client_id %} selected {% endif %}>Выберите получателя</option>
-                                    {% for client in clients %}
-                                        {% if client.id == order.client_id %}
-                                            <option value="{{ client.id }}" selected>{{ client.name }}</option>
-                                        {% else %}
-                                            <option value="{{ client.id }}">{{ client.name }}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                {% if addresses %}
-                                    <select id="address-select" class="form-select py-3 bg-light border-0">  
-                                    
-                                        {% if not order.address in addresses %}
-                                            <option value="{{ order.address }}">{{ order.address }}</option>
-                                        {% endif %}
-                                        {% for i in addresses  %}
-                                            {% if i.address_line == order.address %}
-                                                <option value="{{ order.address }}" selected>{{ order.address }}</option>
+                                {% if order.status == 'draft' %} 
+                                    <select id = "client-select" class="form-select py-3 bg-light border-0" style="border-radius: 12px;">
+                                        <option disabled {% if not order.client_id %} selected {% endif %}>Выберите получателя</option>
+                                        {% for client in clients %}
+                                            {% if client.id == order.client_id %}
+                                                <option value="{{ client.id }}" selected>{{ client.name }}</option>
                                             {% else %}
-                                                <option value="{{ i.address_line }}">{{ i.address_line }}</option>
+                                                <option value="{{ client.id }}">{{ client.name }}</option>
                                             {% endif %}
                                         {% endfor %}
-                                            
-                                    </select>
-                                {% else %}                            
-                                    <select id="address-select" class="form-select py-3 bg-light border-0"                                     
-                                        {% if not order.client.id %} disabled {% endif %}>
-                                        {% if order.address %}
-                                            <option value="{{ order.address }}" selected>{{ order.address }}</option>
-                                        {% else %}
-                                            <option value="" selected disabled>Сначала выберите клиента</option>
-                                        {% endif %}
-                                    </select>
+                                    </select>                     
+                                {% else %}
+                                    <div id = "client-select" class="form-select py-3 bg-light border-0" style="border-radius: 12px;">
+                                        {{order.client.name}}
+                                    </div>  
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {% if order.status == 'draft' %} 
+                                    {% if addresses %}
+                                        <select id="address-select" class="form-select py-3 bg-light border-0">  
+                                        
+                                            {% if not order.address in addresses %}
+                                                <option value="{{ order.address }}">{{ order.address }}</option>
+                                            {% endif %}
+                                            {% for i in addresses  %}
+                                                {% if i.address_line == order.address %}
+                                                    <option value="{{ order.address }}" selected>{{ order.address }}</option>
+                                                {% else %}
+                                                    <option value="{{ i.address_line }}">{{ i.address_line }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                                
+                                        </select>
+                                    {% else %}                            
+                                        <select id="address-select" class="form-select py-3 bg-light border-0"                                     
+                                            {% if not order.client.id %} disabled {% endif %}>
+                                            {% if order.address %}
+                                                <option value="{{ order.address }}" selected>{{ order.address }}</option>
+                                            {% else %}
+                                                <option value="" selected disabled>Сначала выберите клиента</option>
+                                            {% endif %}
+                                        </select>
+                                    {% endif %}
+                                {% else %} 
+                                    <div id="address-select" class="form-select py-3 bg-light border-0">
+                                        {{ order.address }}
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
@@ -104,39 +116,54 @@
                                     
                                     {% for item in items %}
                                     <tr class="order-row">
-                                        <td class="py-4">
-                                            <div class="fw-bold">Website Design & Development</div>
-                                            <small class="text-muted">{{item.name}}</small>
-                                            <input type="hidden" name="product_id" value="{{item.id}}">
-                                        </td>
-                                        <td>
-                                            <div class="qty-control mx-auto">
-                                                <button type="button" class="qty-btn">-</button>
-                                                <input type="text" class="qty-input" value="{{item.quantity}}">
-                                                <button type="button" class="qty-btn">+</button>
-                                            </div>
-                                        </td>
-                                        <td class="text-end fw-bold text-muted order-unit-price">{{item.price}}₽</td>
-                                        <td class="text-end fw-bold order-unit-amount">₽</td>
-                                        <td class="text-end">
-                                            <i class="bi bi-trash trash-btn"></i>
-                                        </td>
+                                        {% if order.status == 'draft' %} 
+                                            <td class="py-4">
+                                                <small class="text-muted">{{item.name}}</small>
+                                                <input type="hidden" name="product_id" value="{{item.id}}">
+                                            </td>
+                                            <td>                                                                          
+                                                <div class="qty-control mx-auto">
+                                                    <button type="button" class="qty-btn">-</button>
+                                                    <input type="text" class="qty-input" value="{{item.quantity}}">
+                                                    <button type="button" class="qty-btn">+</button>
+                                                </div>
+                                            </td>
+                                            <td class="text-end fw-bold text-muted order-unit-price">{{item.price}}₽</td>
+                                            <td class="text-end fw-bold order-unit-amount">₽</td>
+                                            <td class="text-end">
+                                                <i class="bi bi-trash trash-btn"></i>
+                                            </td>
+                                        {% else %}
+                                            <td class="py-4">
+                                                <small class="text-muted">{{item.name}}</small>
+                                                <input type="hidden" name="product_id" value="{{item.id}}">
+                                            </td>
+                                            <td class="text-center fw-bold text-muted order-unit-quantity">   
+                                                {{item.quantity}}                                                                                                                     
+                                            </td>
+                                            <td class="text-end fw-bold text-muted order-unit-price">{{item.price}}₽</td>
+                                            <td class="text-end fw-bold order-unit-amount">{{item.total}}₽</td>
+                                            <td class="text-end"></td>
+                                        {% endif %}
                                     </tr>    
                                     {% endfor %}
 
+                                    {% if order.status == 'draft' %}
                                     <tfoot class="border-top-0">
                                         <tr>
                                             <!-- colspan="5" чтобы растянуть ячейку на всю ширину таблицы -->
                                             <td colspan="5" class="text-center py-4">
+                
                                                 <button type="button" 
-                                                        class="btn btn-link fw-bold text-decoration-none shadow-none" 
-                                                        id="add-item-btn"
-                                                        style="color: var(--primary-teal);">
+                                                            class="btn btn-link fw-bold text-decoration-none shadow-none" 
+                                                            id="add-item-btn"
+                                                            style="color: var(--primary-teal);">
                                                     <i class="bi bi-plus-lg me-1"></i> Добавить позицию
-                                                </button>
+                                                </button>                                             
                                             </td>
                                         </tr>
                                     </tfoot>
+                                    {% endif %}
                                         
                                 </tbody>
                             </table>

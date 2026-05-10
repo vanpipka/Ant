@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderItem
+from .models import Order, OrderItem, Product
 
 class OrderItemInline(admin.TabularInline):
     """Позволяет редактировать товары прямо в карточке заказа"""
@@ -65,3 +65,37 @@ class OrderItemAdmin(admin.ModelAdmin):
     list_display = ('product_id', 'name', 'order', 'quantity', 'price', 'total')
     list_filter = ('order__status',)
     search_fields = ('name', 'product_id', 'order__external_id')
+    
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    # Поля, которые будут отображаться в списке товаров
+    list_display = ('product_id', 'name', 'user', 'price')
+    
+    # Поля, по которым можно кликнуть для перехода к редактированию
+    list_display_links = ('product_id', 'name')
+    
+    # Фильтры в правой колонке (очень полезно, если клиентов много)
+    list_filter = ('user',)
+    
+    # Поиск по названию, внутреннему ID и имени клиента (через __name)
+    search_fields = ('name', 'product_id', 'client__name')
+    
+    # Позволяет редактировать цену прямо в списке, не заходя в карточку товара
+    list_editable = ('price',)
+    
+    # Упорядочивание по умолчанию
+    ordering = ('user', 'name')
+    
+    # Группировка полей в самой карточке товара
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('user', 'name', 'product_id')
+        }),
+        ('Ценообразование', {
+            'fields': ('price',),
+        }),
+    )
+
+    # Опционально: если вы хотите ускорить выбор клиента (если их тысячи)
+    raw_id_fields = ('user',)

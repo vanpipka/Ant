@@ -12,7 +12,7 @@ import json
 
 from accounts.models import Client
 from accounts.models import ClientAddress
-from orders.models import Order, OrderItem
+from orders.models import Order, OrderItem, Product
 from .services import OrderService
 
 User = get_user_model()
@@ -87,36 +87,28 @@ def get_addresses(request):
 
 @login_required 
 def product_search_api(request):
-    query = request.GET.get('q', '').strip()
+    
+    query = request.GET.get('q', '').strip().lower()
     
     # Базовый кверисет активных товаров
-    #products = Product.objects.all()
+    products = Product.objects.filter(user=request.user)
     
-    #if query:
-    #    # Ищем по имени или по артикулу (product_id)
-    #    products = products.filter(
-    #        Q(name__icontains=query) | Q(product_id__icontains=query)
-    #    )
+    if query:
+    # Ищем по имени или по артикулу (product_id)
+        products = products.filter(search_name__icontains=query)
     
     # Берем первые 20 результатов, чтобы не перегружать модалку
-    #products = products[:20]
+    products = products[:20]
     
     # Формируем список словарей для JSON
-    #data = [
-    #    {
-    #        "product_id": p.product_id,
-    #        "name": p.name,
-    #        "price": float(p.price), # Decimal нужно преобразовать в float или string
-    #    } 
-    #    for p in products
-    #]
-    data = []
-    for i in range(30):
-        data.append({
-            "product_id": f"SKU-{i:03d}",
-            "name": f"Продукт {i}",
-            "price": 1000 + i * 50,
-        })
+    data = [
+        {
+            "product_id": p.product_id,
+            "name": p.name,
+            "price": float(p.price), # Decimal нужно преобразовать в float или string
+        } 
+        for p in products
+    ]
      
     return JsonResponse(data, safe=False)
 

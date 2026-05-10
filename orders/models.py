@@ -1,5 +1,7 @@
 from django.db import models
 
+from accounts.models import User
+
 
 class Order(models.Model):
     
@@ -54,3 +56,23 @@ class OrderItem(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
 
     total = models.DecimalField(max_digits=12, decimal_places=2)
+
+
+class Product(models.Model):
+    user = models.ForeignKey(User, related_name="products", on_delete=models.CASCADE)
+
+    product_id = models.CharField(max_length=64)
+    name = models.CharField(max_length=255)
+    
+    search_name = models.CharField(max_length=255, db_index=True, blank=True, editable=False)
+
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    def save(self, *args, **kwargs):
+        # Автоматически переводим имя в нижний регистр перед сохранением
+        if self.name:
+            self.search_name = self.name.lower()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name

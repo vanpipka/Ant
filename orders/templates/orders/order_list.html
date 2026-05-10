@@ -7,7 +7,7 @@
         <!-- Toolbar -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <button data-url="{% url 'order_modal_create' %}" class="btn btn-sm btn-new-invoice open-order-modal">
-                <i class="bi bi-plus"></i> Новый заказ
+                <i class="bi bi-plus"></i> Заказ
             </button>
             
             <div >
@@ -47,13 +47,13 @@
                     {% for order in orders %} 
                         <tr>
                             {% if order.number %}
-                                <td><a href="#" class="invoice-id">{{order.number}}</a></td>
+                                <td class="invoice-id" style="color: var(--primary-teal)">{{order.number}}</td>  
                             {% else %}
-                                <td><a href="#" class="invoice-id">{{order.id}} (не выгружен)</a></td>
+                                <td style="color: grey">{{order.id}} (не выгружен)</td>
                             {% endif %}
                             <td class="text-muted small">{{order.created_at | date:"M d, Y"}}</td>
                             <td class="amount-cell">{{order.total_amount|floatformat:2}}₽</td>
-                            <td class="count-cell">{{order.tems.count}}</td>
+                            <td class="count-cell">{{order.items.count}}</td>
                             <td><span class="badge-custom status-{{ order.get_status_class }}">{{order.get_status_display}}</span></td>
                             <td class="text-muted small">{{order.address}}</td>
                             <td class="text-end">

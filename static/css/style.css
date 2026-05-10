@@ -225,9 +225,11 @@ body {
             font-weight: 700;
         }
 
+        /*
         .invoice-id:hover {
             text-decoration: underline;
         }
+        */
 
         .amount-cell {
             font-weight: 700;

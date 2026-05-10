@@ -59,7 +59,7 @@ async function loadProducts(query = '') {
             item.innerHTML = `
                 <div>
                     <div class="fw-bold">${product.name}</div>
-                    <small class="text-muted">Арт: ${product.product_id} | ${product.price}₽</small>
+                    <small class="text-muted">Цена: ${product.price}₽</small>
                 </div>
                 <button class="btn btn-sm btn-outline-primary select-product-btn" 
                         data-id="${product.product_id}" 
@@ -74,11 +74,6 @@ async function loadProducts(query = '') {
         listContainer.innerHTML = '<div class="p-3 text-danger">Ошибка загрузки товаров</div>';
     }
 }
-
-// Поиск "на лету"
-//document.getElementById('product-search-input').addEventListener('input', (e) => {
-//    loadProducts(e.target.value);
-//});
 
 // Инициализация тултипов и поповеров Bootstrap (если понадобятся)
 document.addEventListener('DOMContentLoaded', function () {
@@ -105,6 +100,9 @@ document.addEventListener('input', function(e) {
             e.target.value = 1;
         }
     }
+    else if (e.target.id === 'product-search-input') {
+        loadProducts(e.target.value);
+    };
 });
 
 document.addEventListener('DOMContentLoaded', function() {
