@@ -196,7 +196,7 @@
                                     id="order_description" 
                                     name = "order_description" 
                                     rows="3" 
-                                    {% if order.status == 'draft' %} disabled readonly {% endif %}
+                                    {% if order.status != 'draft' %} disabled readonly {% endif %}
                                     placeholder="Введите примечание к заказу...">{{order.description}}</textarea>
                         </div>
                         <!--
