@@ -140,7 +140,7 @@ document.addEventListener('change', function(e) {
                 
                 data.forEach(addr => {
                     const option = document.createElement('option');
-                    option.value = addr.id;
+                    option.value = addr.address_line;
                     option.textContent = addr.address_line;
                     addressSelect.appendChild(option);
                 });
@@ -179,7 +179,7 @@ document.addEventListener('click', function(e) {
         const input = container.querySelector('.qty-input');
         let currentValue = parseInt(input.value) || 0;
 
-        console.log('Текущая qty:', currentValue);
+        // console.log('Текущая qty:', currentValue);
         if (e.target.innerText === '+') {
             input.value = currentValue + 1;
         } else if (e.target.innerText === '-') {
@@ -215,16 +215,19 @@ document.addEventListener('click', function(e) {
                         <td class="py-4">
                             <div class="fw-bold"></div>
                             <small class="text-muted">${product.name}</small>
-                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="item_product_id" value="${product.id}">
                         </td>
                         <td>
                             <div class="qty-control mx-auto">
                                 <button type="button" class="qty-btn">-</button>
-                                <input type="text" class="qty-input" value="1">
+                                <input type="text" name="item_quantity" class="qty-input" value="1">
                                 <button type="button" class="qty-btn">+</button>
                             </div>
                         </td>
-                        <td class="text-end fw-bold text-muted order-unit-price">${product.price}₽</td>
+                        <td class="text-end fw-bold text-muted order-unit-price">
+                            ${product.price}₽
+                            <input type="hidden" name="item_price" value="${product.price}">    
+                        </td>
                         <td class="text-end fw-bold order-unit-amount">${product.price}₽</td>
                         <td class="text-end">
                             <i class="bi bi-trash trash-btn"></i>
@@ -296,5 +299,36 @@ document.addEventListener('DOMContentLoaded', function() {
         const val = searchInput.value;
         searchInput.value = '';
         searchInput.value = val;
+    }
+});
+
+document.addEventListener('submit', function(event) {
+    
+    // Проверяем, что событие пришло именно от нашей формы
+    if (event.target && event.target.id === 'order-main-form') {
+        const addressSelect = document.getElementById('address-select');
+        const selectSelect = document.getElementById('client-select');
+        
+        let showAlert = false;
+
+        console.log(selectSelect.value, addressSelect.value);
+
+        if (!selectSelect || !selectSelect.value || selectSelect.value === 'Выберите получателя') {
+            event.preventDefault(); // Останавливаем отправку
+            selectSelect.classList.add('is-invalid');
+            showAlert = true;
+        }
+
+        if (!addressSelect || !addressSelect.value) {
+            event.preventDefault(); // Останавливаем отправку
+            addressSelect.classList.add('is-invalid');
+            showAlert = true;
+        }
+
+        if (showAlert) {
+            const toastLiveExample = document.getElementById('errorToast');
+            const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
+            toastBootstrap.show();
+        }
     }
 });

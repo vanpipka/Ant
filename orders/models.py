@@ -1,3 +1,6 @@
+
+from django.utils import timezone
+
 from django.db import models
 
 from accounts.models import Client
@@ -17,7 +20,9 @@ class Order(models.Model):
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=True, blank=True)
     client = models.ForeignKey("accounts.Client", on_delete=models.CASCADE)
     address = models.CharField(max_length=255, default="")
+    date = models.DateTimeField(default=timezone.now, null=True, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
+    description = models.TextField(blank=True, default="")
 
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 

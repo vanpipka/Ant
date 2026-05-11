@@ -1,8 +1,12 @@
 
       <div class="modal-header">
             <div class="text-start">
-                <h3 class="fw-bold mb-0  id="orderModalLabel">ЗАКАЗ</h3>
-                <small class="text-muted">{{order.number}}</small>
+                <h3 class="fw-bold mb-0"  id="orderModalLabel">ЗАКАЗ</h3>
+                {% if order.number %}
+                    <small class="text-muted">{{order.number}}</small>
+                {% else %}
+                    <small class="text-muted">{{order.id}} (не выгружен)</small>
+                {% endif %}
             </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -24,7 +28,7 @@
                         <div class="stats-card">
                             <div>
                                 <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Оплата</small>
-                                <h4 class="mb-0 fw-bold"></h4>
+                                <h4 class="mb-0 fw-bold">--</h4>
                             </div>
                             <div class="stats-icon" style="background: #f0fdf4; color: #16a34a;"><i class="bi bi-check-circle"></i></div>
                         </div>
@@ -43,12 +47,13 @@
                 <!-- Main Invoice Form -->
                 <div class="invoice-container">
                 
-                    <form method="post">
+                    <form method="post" name="order-main-form" id="order-main-form" action="/orders/save/">
+                        <input type="hidden" name="order_id" value="{% if order.id %}{{order.id}}{% endif %}">
                         {% csrf_token %}
                         <div class="row g-4">
                             <div class="col-md-6">
                                 {% if order.status == 'draft' %} 
-                                    <select id = "client-select" class="form-select py-3 bg-light border-0" style="border-radius: 12px;">
+                                    <select id="client-select" name="client_id" class="form-select py-3 bg-light border-0" style="border-radius: 12px;">
                                         <option disabled {% if not order.client_id %} selected {% endif %}>Выберите получателя</option>
                                         {% for client in clients %}
                                             {% if client.id == order.client_id %}
@@ -59,7 +64,8 @@
                                         {% endfor %}
                                     </select>                     
                                 {% else %}
-                                    <div id = "client-select" class="form-select py-3 bg-light border-0" style="border-radius: 12px;">
+                                    <input type="hidden" name="client_id" value="{{order.client.id}}">
+                                    <div id="client-select" name="client-select" class="form-select py-3 bg-light border-0" style="border-radius: 12px;">
                                         {{order.client.name}}
                                     </div>  
                                 {% endif %}
@@ -67,7 +73,7 @@
                             <div class="col-md-6">
                                 {% if order.status == 'draft' %} 
                                     {% if addresses %}
-                                        <select id="address-select" class="form-select py-3 bg-light border-0">  
+                                        <select id="address-select" name="address_id" class="form-select py-3 bg-light border-0" required>  
                                         
                                             {% if not order.address in addresses %}
                                                 <option value="{{ order.address }}">{{ order.address }}</option>
@@ -82,8 +88,8 @@
                                                 
                                         </select>
                                     {% else %}                            
-                                        <select id="address-select" class="form-select py-3 bg-light border-0"                                     
-                                            {% if not order.client.id %} disabled {% endif %}>
+                                        <select id="address-select" name="address_id" class="form-select py-3 bg-light border-0"                                     
+                                            {% if not order.client.id %} disabled {% endif %} required>
                                             {% if order.address %}
                                                 <option value="{{ order.address }}" selected>{{ order.address }}</option>
                                             {% else %}
@@ -92,7 +98,7 @@
                                         </select>
                                     {% endif %}
                                 {% else %} 
-                                    <div id="address-select" class="form-select py-3 bg-light border-0">
+                                    <div id="address-select" name="address_id" class="form-select py-3 bg-light border-0">
                                         {{ order.address }}
                                     </div>
                                 {% endif %}
@@ -119,17 +125,21 @@
                                         {% if order.status == 'draft' %} 
                                             <td class="py-4">
                                                 <small class="text-muted">{{item.name}}</small>
-                                                <input type="hidden" name="product_id" value="{{item.id}}">
+                                                <input type="hidden" name="item_product_id" value="{{item.product_id}}">
                                             </td>
                                             <td>                                                                          
                                                 <div class="qty-control mx-auto">
                                                     <button type="button" class="qty-btn">-</button>
-                                                    <input type="text" class="qty-input" value="{{item.quantity}}">
+                                                    <input type="text" name="item_quantity" class="qty-input" value="{{item.quantity}}">
                                                     <button type="button" class="qty-btn">+</button>
                                                 </div>
+                                                
                                             </td>
-                                            <td class="text-end fw-bold text-muted order-unit-price">{{item.price}}₽</td>
-                                            <td class="text-end fw-bold order-unit-amount">₽</td>
+                                            <td class="text-end fw-bold text-muted order-unit-price">
+                                                {{item.price}}₽
+                                                <input type="hidden" name="item_price" value="{{item.price}}">
+                                            </td>
+                                            <td class="text-end fw-bold order-unit-amount">₽</td>                                         
                                             <td class="text-end">
                                                 <i class="bi bi-trash trash-btn"></i>
                                             </td>
@@ -179,11 +189,16 @@
                             </table>
                         </div>
                          -->
-
-                        <div class="mt-5 pt-4"> <!-- border-top">-->
+                        <div class="pt-4"> <!-- border-top">-->
+                            <h6 class="text-uppercase fw-bold small text-muted">Примечание</h6>
+                            <textarea class="form-control" id="order_description" name = "order_description" rows="3" placeholder="Введите примечание к заказу...">{{order.description}}</textarea>
+                        </div>
+                        <!--
+                        <div class="mt-5 pt-4">
                             <h6 class="text-uppercase fw-bold small text-muted">Notes</h6>
                             <p class="text-muted small">Thank you for your business. If you have any questions about this invoice, contact our billing team.</p>
                         </div>
+                        -->
                     </form>
                 </div>
             </div>
@@ -191,7 +206,9 @@
         </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-        <button type="button" class="btn btn-primary">Сохранить</button>
+        {% if order.status == 'draft' %}
+            <button type="submit" form="order-main-form" class="btn btn-new-invoice">Сохранить</button>
+        {% endif %}
       </div>
 
 
@@ -218,3 +235,16 @@
         </div>
     </div>
 </div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        Заполните все обязательные поля и добавьте хотя бы одну позицию в заказ.
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+  

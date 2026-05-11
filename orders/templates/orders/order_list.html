@@ -51,15 +51,29 @@
                             {% else %}
                                 <td style="color: grey">{{order.id}} (не выгружен)</td>
                             {% endif %}
-                            <td class="text-muted small">{{order.created_at | date:"M d, Y"}}</td>
+                            <td class="text-muted small">{{order.date | date:"d.m.Y"}}</td>
                             <td class="amount-cell">{{order.total_amount|floatformat:2}}₽</td>
                             <td class="count-cell">{{order.items.count}}</td>
                             <td><span class="badge-custom status-{{ order.get_status_class }}">{{order.get_status_display}}</span></td>
                             <td class="text-muted small">{{order.address}}</td>
                             <td class="text-end">
-                                <a href="{% url 'order_modal' order.id %}" class="open-order-modal">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+
+                                <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                                    <a href="{% url 'order_modal' order.id %}" class="btn open-order-modal">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+
+                                    <div class="btn-group" role="group">
+                                        <a id="btnGroupDrop1" class="btn" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </a>
+
+                                        <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                            <li><a class="dropdown-item open-order-modal" href="{% url 'order_modal' order.id %}?copy=true">Копировать</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
                             </td>
                         </tr>
                     {% endfor %}

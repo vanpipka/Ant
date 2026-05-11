@@ -2,9 +2,10 @@ from django.views.generic import ListView
 from django.views.decorators.http import require_POST
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseNotFound, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 from django.shortcuts import render
+from django.http import HttpResponseNotFound, JsonResponse
 from decimal import Decimal
 from django.db import transaction
 
@@ -52,6 +53,7 @@ class OrderListView(LoginRequiredMixin, ListView):
     
 @login_required 
 def order_modal_handler(request, pk=None):
+    
     if pk:
         # Режим редактирования
         order = OrderService.get_order_for_user(request.user, pk)
@@ -62,6 +64,15 @@ def order_modal_handler(request, pk=None):
         order = Order(user=request.user)
         order.mock_items = []  # Временное поле для хранения позиций в памяти (не сохраняется в БД) 
 
+    if request.GET.get('copy') == 'true' and pk:
+        # Режим копирования
+        order.mock_items = list(order.items.all())  # Копируем позиции в mock_items для отображения в форме
+       
+        order.id = None  # Сброс ID, чтобы при сохранении создался новый заказ
+        order.external_id = '' # Сбрасываем external_id, чтобы не было конфликтов при синхронизации с 1С
+        order.number = ''  # Очищаем номер, чтобы не было конфликтов 
+        order.status = Order.Status.DRAFT  # Сбрасываем статус на черновик
+        
     context = {
         'order': order,
         'items': order.items.all() if order.id else order.mock_items,
@@ -114,6 +125,7 @@ def product_search_api(request):
     return JsonResponse(data, safe=False)
 
 
+@login_required 
 @require_POST
 def set_order_full(request):
     try:
@@ -123,6 +135,7 @@ def set_order_full(request):
         order_ext_id = data.get('external_id')
         user_ext_id = data.get('user_external_id')
         client_ext_id = data.get('client_external_id')
+        date = data.get('date')  # Если нужно, можно парсить дату из строки
         
         if not all([order_ext_id, client_ext_id]):
             return JsonResponse({'success': False, 'error': 'Отсутствует external_id заказа или клиента'}, status=400)
@@ -142,6 +155,7 @@ def set_order_full(request):
                 external_id=order_ext_id,
                 defaults={
                     'user': user,
+                    'date': date,
                     'client': client,
                     'number': data.get('number', ''),
                     'address': data.get('address', ''),
@@ -184,7 +198,72 @@ def set_order_full(request):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
     
+  
+@login_required   
+@transaction.atomic
+def save_order(request):
+    if request.method == 'POST':
+        # Получаем одиночные значения
+        order_id = request.POST.get('order_id')
+        client_id = request.POST.get('client_id')
+        description = request.POST.get('order_description', '')
+        address = request.POST.get('address_id', '') # Если это ID адреса
+        
+        if not address:
+            address = request.POST.get('address', '')
+        
+        if not order_id:     
+            # Создаем заказ
+            order = Order.objects.create(
+                user = request.user,
+                client_id = client_id,
+                description = description,
+                address = address, # Или текстовое поле
+                status = Order.Status.DRAFT
+            )
+        else:
+            # Обновляем существующий заказ
+            order = Order.objects.get(id=order_id, user=request.user)
+            order.client_id = client_id
+            order.address = address
+            order.description = description
+            order.status = Order.Status.DRAFT
+            order.items.all().delete() # Удаляем старые позиции, чтобы записать новые
+            
+
+        # Получаем списки (важно: порядок в списках сохраняется)
+        product_ids = request.POST.getlist('item_product_id')
+        quantities = request.POST.getlist('item_quantity')
+        prices = request.POST.getlist('item_price')
+
+        total_amount = 0
+        
+        # Проходим циклом по спискам
+        for i in range(len(product_ids)):
+            qty = int(quantities[i])
+            price = Decimal(prices[i])
+            product_id = product_ids[i]
+            subtotal = qty * price
+            
+            product = Product.objects.get(client_id=client_id, product_id=product_id)
+            
+            OrderItem.objects.create(
+                order=order,
+                product_id=product.product_id,
+                name=product.name,
+                quantity=qty,
+                price=price,
+                total=subtotal
+            )
+            total_amount += subtotal
+        
+        order.total_amount = total_amount
+        order.save()
+        
+        return redirect('/') # Или другой URL
     
+
+@login_required     
 @require_POST
 def set_products_full(request):
     try:
