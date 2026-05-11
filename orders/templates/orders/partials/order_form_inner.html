@@ -190,8 +190,14 @@
                         </div>
                          -->
                         <div class="pt-4"> <!-- border-top">-->
-                            <h6 class="text-uppercase fw-bold small text-muted">Примечание</h6>
-                            <textarea class="form-control" id="order_description" name = "order_description" rows="3" placeholder="Введите примечание к заказу...">{{order.description}}</textarea>
+                            <h6 class="text-uppercase fw-bold small text-muted" >Примечание</h6>
+                            <textarea 
+                                    class="form-control" 
+                                    id="order_description" 
+                                    name = "order_description" 
+                                    rows="3" 
+                                    {% if order.status == 'draft' %} disabled readonly {% endif %}
+                                    placeholder="Введите примечание к заказу...">{{order.description}}</textarea>
                         </div>
                         <!--
                         <div class="mt-5 pt-4">
