@@ -54,7 +54,7 @@ class OrderService:
             query = query.filter(status=status)
         if search_query:
             query = query.filter(Q(number__icontains=search_query) | Q(id__icontains=search_query))
-        return query.order_by('-created_at')[:50]
+        return query.order_by('-date')[:50]
         
     @staticmethod
     def get_order_for_user(user, id):
