@@ -23,7 +23,7 @@ class OrderListView(LoginRequiredMixin, ListView):
     model = Order
     template_name = 'orders/order_list.html' # Путь к вашему шаблону
     context_object_name = 'orders'
-    paginate_by = 6  # Количество записей на одной странице
+    paginate_by = 10  # Количество записей на одной странице
 
     def get_queryset(self):
         # 1. Получаем всех клиентов, к которым привязан текущий юзер
