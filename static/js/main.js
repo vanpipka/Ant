@@ -269,7 +269,7 @@ document.addEventListener('click', function(e) {
         
         newRow.innerHTML = `
                         <td class="py-4">
-                            <div class="custom-select-container position-relative" style="max-width: 400px;">
+                            <div class="custom-select-container position-relative" style="">
                                 <div 
                                     id="select-item-display-${nextIndex}" 
                                     data-row-id="${nextIndex}"
