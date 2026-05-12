@@ -66,7 +66,14 @@ def order_modal_handler(request, pk=None):
 
     if request.GET.get('copy') == 'true' and pk:
         # Режим копирования
-        order.mock_items = list(order.items.all())  # Копируем позиции в mock_items для отображения в форме
+        order.mock_items = []
+        for i in order.items.all():
+            
+            try:
+                Product.objects.get(client_id=order.client_id, product_id=i.product_id)             
+                order.mock_items.append(i)
+            except Product.DoesNotExist:
+                continue  # Если товар не найден, пропускаем эту позицию                
        
         order.id = None  # Сброс ID, чтобы при сохранении создался новый заказ
         order.external_id = '' # Сбрасываем external_id, чтобы не было конфликтов при синхронизации с 1С
@@ -245,17 +252,20 @@ def save_order(request):
             product_id = product_ids[i]
             subtotal = qty * price
             
-            product = Product.objects.get(client_id=client_id, product_id=product_id)
-            
-            OrderItem.objects.create(
-                order=order,
-                product_id=product.product_id,
-                name=product.name,
-                quantity=qty,
-                price=price,
-                total=subtotal
-            )
-            total_amount += subtotal
+            try:
+                product = Product.objects.get(client_id=client_id, product_id=product_id)
+                
+                OrderItem.objects.create(
+                    order=order,
+                    product_id=product.product_id,
+                    name=product.name,
+                    quantity=qty,
+                    price=price,
+                    total=subtotal
+                )
+                total_amount += subtotal
+            except Product.DoesNotExist:
+                continue  # Если товар не найден, пропускаем эту позицию
         
         order.total_amount = total_amount
         order.save()
