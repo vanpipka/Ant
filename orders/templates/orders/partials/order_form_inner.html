@@ -48,6 +48,7 @@
                 <div class="invoice-container">
                 
                     <form method="post" name="order-main-form" id="order-main-form" action="/orders/save/">
+                        <input type="hidden" name="status" id="final-status" value="draft">
                         <input type="hidden" name="order_id" value="{% if order.id %}{{order.id}}{% endif %}">
                         {% csrf_token %}
                         <div class="row g-4">
@@ -244,7 +245,7 @@
 
 
 
-
+{% if order.status == 'draft' %}
 <div class="modal fade" id="productPickerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -277,5 +278,29 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="confirmSaveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Завершение заказа</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="bi bi-question-circle text-primary" style="font-size: 3rem;"></i>
+                <p class="mt-3 fs-5">Как вы хотите сохранить этот заказ?</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-outline-secondary px-4" id="save-as-draft">
+                    <i class="bi bi-pause-fill"></i> Как черновик
+                </button>
+                <button type="button" class="btn btn-primary px-4" id="save-as-confirmed" style="background-color: var(--primary-teal);">
+                    <i class="bi bi-check-lg"></i> В обработку
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
   

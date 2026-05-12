@@ -452,6 +452,59 @@ document.addEventListener('submit', function(event) {
             const toastLiveExample = document.getElementById('errorToast');
             const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
             toastBootstrap.show();
+            return;
+        }
+
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmSaveModal'));
+
+        // Если все ок, форма отправится и дальше уже будет обработана на сервере
+        if (!event.detail || !event.detail.confirmed) {
+         
+            if (!confirmModal) return;
+
+            event.preventDefault(); // Останавливаем отправку
+            
+            // Здесь можно добавить вашу проверку (например, выбран ли адрес)
+            const address = document.getElementById('address-select').value;
+            if (!address) {
+                appendAlert('Сначала выберите адрес!', 'danger');
+                return;
+            }
+
+            confirmModal.show(); // Показываем окно выбора
+        }
+
+        // 2. Обработка кнопки "Как черновик"
+        document.getElementById('save-as-draft').addEventListener('click', function() {
+            const finalStatusInput = document.getElementById('final-status');
+            finalStatusInput.value = 'draft';
+            submitForm();
+        });
+
+        // 3. Обработка кнопки "В обработку"
+        document.getElementById('save-as-confirmed').addEventListener('click', function() {
+            const finalStatusInput = document.getElementById('final-status');
+            finalStatusInput.value = 'sent'; // Или 'sent' в зависимости от вашего TextChoices
+            submitForm();
+        });
+
+        function submitForm() {
+
+           console.log('Подтверждено, отправляем форму с статусом:', document.getElementById('final-status').value);
+
+            const mainForm = document.getElementById('order-main-form');
+            if (!mainForm) return;
+
+            confirmModal.hide();
+            // Отправляем форму заново, но передаем флаг подтверждения в detail
+            const event = new CustomEvent('submit', {
+                cancelable: true,
+                detail: { confirmed: true }
+            });
+            mainForm.dispatchEvent(event);
+            if (mainForm.reportValidity()) {
+                mainForm.submit();
+            }
         }
     }
 });

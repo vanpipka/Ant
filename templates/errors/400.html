@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}Неверный запрос - 400{% endblock %}
 
 {% block content %}
@@ -7,7 +7,7 @@
     <div class="error-card">
         <!-- Шапка с логотипом и бейджем -->
         <div class="d-flex justify-content-center align-items-center gap-2 mb-4">
-            <img src="logo.png" alt="Logo" height="30">
+            <img src="{% static 'img/logo_1.png' %}" alt="Logo" height="30">
             <span class="error-badge" style="background:#f0fdfa; color:#14a49a;">Error 400</span>
         </div>
 
@@ -27,7 +27,7 @@
                 <i class="bi bi-arrow-clockwise"></i> Refresh Page
             </button>
             <a href="/" class="btn-error-outline">
-                <i class="bi bi-house"></i> Home Screen
+                <i class="bi bi-house"></i> Заказы
             </a>
         </div>
     </div>

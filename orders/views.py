@@ -217,6 +217,7 @@ def save_order(request):
         client_id = request.POST.get('client_id')
         description = request.POST.get('order_description', '')
         address = request.POST.get('address_id', '') # Если это ID адреса
+        status = request.POST.get('status', 'draft') 
         
         if not address:
             address = request.POST.get('address', '')
@@ -228,7 +229,7 @@ def save_order(request):
                 client_id = client_id,
                 description = description,
                 address = address, # Или текстовое поле
-                status = Order.Status.DRAFT
+                status = status
             )
         else:
             # Обновляем существующий заказ
@@ -236,7 +237,7 @@ def save_order(request):
             order.client_id = client_id
             order.address = address
             order.description = description
-            order.status = Order.Status.DRAFT
+            order.status = status
             order.items.all().delete() # Удаляем старые позиции, чтобы записать новые
             
 
