@@ -124,8 +124,32 @@
                                     <tr class="order-row">
                                         {% if order.status == 'draft' %} 
                                             <td class="py-4">
+                                                <!--
                                                 <small class="text-muted">{{item.name}}</small>
                                                 <input type="hidden" name="item_product_id" value="{{item.product_id}}">
+                                                -->
+                                                <div class="custom-select-container position-relative" style="max-width: 400px;">
+
+                                                    <div 
+                                                        id="select-item-display-{{ forloop.counter }}" 
+                                                        data-row-id="{{ forloop.counter }}"
+                                                        class="select-display-trigger form-select py-3 bg-light border-0 cursor-pointer" 
+                                                        style="border-radius: 12px;">
+                                                        {{item.name}}
+                                                    </div>
+                                                    
+                                                    <input type="hidden" id="item_product_id_{{ forloop.counter }}" name="item_product_id" value="{{item.product_id}}">
+
+                                                    <div 
+                                                        id="select-dropdown{{ forloop.counter }}"               
+                                                        class="select-item-dropdown-menu dropdown-menu shadow-lg border-0 w-100 mt-2 p-2" 
+                                                        style="border-radius: 12px; display: none;">
+                                                        <input type="text" id="select-search" class="form-control mb-2 p-2 border-0 bg-light" placeholder="Поиск..." autocomplete="off">
+                                                        
+                                                        <div id="results-list" style="max-height: 300px; overflow-y: auto;">
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td>                                                                          
                                                 <div class="qty-control mx-auto">

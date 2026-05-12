@@ -1,3 +1,68 @@
+const CACHE_ITEMS_KEY = 'last_selected_items';
+
+// Функция для кастомного селекта подбора номенклатуры
+// 1. Инициализация при открытии - показываем последние 5 из кэша
+function renderInitialList(container) {
+    const cache = JSON.parse(localStorage.getItem(CACHE_ITEMS_KEY) || '[]');
+    console.log(cache)
+    renderItems(cache, container);
+}
+
+// 2. Рендер списка
+function renderItems(items, container) {
+
+        if (!container) return;
+        const resultsList = container.querySelector('#results-list');
+
+        resultsList.innerHTML = '';
+        if (items.length === 0) {
+            resultsList.innerHTML = '<div class="text-muted p-2 small">Ничего не найдено</div>';
+            return;
+        }
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item p-2 cursor-pointer rounded';
+            div.style.cursor = 'pointer';
+            div.textContent = item.name;
+            div.onclick = () => selectItem(item, container);
+            resultsList.appendChild(div);
+        });
+}
+
+// 3. Логика выбора и кэширования
+function selectItem(item, container) {
+    
+    // console.log('Выбран товар:', item);
+
+    // Здесь можно добавить логику добавления товара в заказ
+    const row = container.closest('.order-row');
+    const price = row.querySelector('.order-unit-price');
+    const hiddenPrice = row.querySelector('input[type="hidden"]');
+    const display = container.querySelector('.select-display-trigger');
+    const hiddenInput = container.querySelector('input[type="hidden"]');
+    const dropdown = container.querySelector('.select-item-dropdown-menu');
+    
+
+    display.textContent = item.name;
+    price.textContent = `${item.price}₽`;
+    hiddenPrice.value = item.price;
+    hiddenInput.value = item.product_id; // Здесь сохранится ID выбранной страны
+    dropdown.style.display = 'none';
+
+    // Если вам нужно сделать что-то еще с ID строки:
+    const rowId = display.getAttribute('data-row-id');
+    // console.log(`Выбрано в строке №${rowId}: ${item.name}`);
+
+    // Сохраняем в кэш (LocalStorage)
+    let cache = JSON.parse(localStorage.getItem(CACHE_ITEMS_KEY) || '[]');
+
+    cache = [item, ...cache.filter(i => i.product_id !== item.product_id)].slice(0, 5);
+    localStorage.setItem(CACHE_ITEMS_KEY, JSON.stringify(cache));
+
+    updateInvoiceTotals();
+
+}
+
 // Функция для очистки строки от символов валюты и превращения в число
 const parseCurrency = (text) => {
         return parseFloat(text.replace(/[^0-9.-]+/g, "")) || 0;
@@ -106,6 +171,7 @@ document.addEventListener('input', function(e) {
     };
 });
 
+// Пересчет сумм
 document.addEventListener('DOMContentLoaded', function() {
     
     // Слушаем событие 'change', которое вылетает из вашего скрипта кнопок
@@ -119,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateInvoiceTotals();
 });
 
-// Используем делегирование для динамически подгруженного контента
+// Выбор адреса в заказе
 document.addEventListener('change', function(e) {
     // Проверяем, что событие произошло именно на списке клиентов
     if (e.target && e.target.id === 'client-select') {
@@ -192,13 +258,49 @@ document.addEventListener('click', function(e) {
         // (например, пересчет суммы) узнали об изменении
         input.dispatchEvent(new Event('change', { bubbles: true }));
     }
+
     // Проверим нажата ли кнопка подбора товаров (может быть иконка, может быть кнопка с id)
     if (e.target.closest('#add-item-btn')) {
+        
+        const tbody = document.querySelector('#order-items-container');
+        const newRow = document.createElement('tr');
+        newRow.className = 'order-row';
+        
+        newRow.innerHTML = `
+                        <td class="py-4">
+                            <div class="fw-bold"></div>
+                            <small class="text-muted"></small>
+                            <input type="hidden" name="item_product_id" value="">
+                        </td>
+                        <td>
+                            <div class="qty-control mx-auto">
+                                <button type="button" class="qty-btn">-</button>
+                                <input type="text" name="item_quantity" class="qty-input" value="1">
+                                <button type="button" class="qty-btn">+</button>
+                            </div>
+                        </td>
+                        <td class="text-end fw-bold text-muted order-unit-price">
+                            0.00₽
+                            <input type="hidden" name="item_price" value="0.00">    
+                        </td>
+                        <td class="text-end fw-bold order-unit-amount">0.00₽</td>
+                        <td class="text-end">
+                            <i class="bi bi-trash trash-btn"></i>
+                        </td>
+        `;
+
+        tbody.appendChild(newRow);
+
+        // Ниже - вариант с модальной формой для выбора товара. 
+        /*
         const pickerModal = new bootstrap.Modal(document.getElementById('productPickerModal'));
         pickerModal.show();
         loadProducts(); // Подгружаем список при открытии
+        */
+
     }
-    // Проверяем, нажата ли кнопка "Добавить" в списке товаров
+
+    // Подбор товара из модального окна
     const btn = e.target.closest('.select-product-btn');
     if (btn) {
         const product = {
@@ -311,7 +413,7 @@ document.addEventListener('submit', function(event) {
         
         let showAlert = false;
 
-        console.log(selectSelect.value, addressSelect.value);
+        // console.log(selectSelect.value, addressSelect.value);
 
         if (!selectSelect || !selectSelect.value || selectSelect.value === 'Выберите получателя') {
             event.preventDefault(); // Останавливаем отправку
@@ -332,3 +434,56 @@ document.addEventListener('submit', function(event) {
         }
     }
 });
+
+document.addEventListener('click', function(e) {
+
+    if (e.target.classList.contains('select-display-trigger')) {
+        const container = e.target.closest('.custom-select-container');
+        const dropdown = container.querySelector('.select-item-dropdown-menu');
+        const resultList = container.querySelector('.results-list');
+        
+        // Закрываем другие открытые списки
+        document.querySelectorAll('.select-dropdown-menu').forEach(d => {
+            if (d !== dropdown) d.style.display = 'none';
+        });
+
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        if (dropdown.style.display === 'block') {
+            container.querySelector('#select-search').focus();
+            renderInitialList(container);
+        }
+    }
+
+    // Закрытие при клике вне компонента
+    if (!e.target.closest('.custom-select-container')){
+        document.querySelectorAll('.select-item-dropdown-menu').forEach(d => d.style.display = 'none');
+    }
+});
+
+
+document.addEventListener('input', function(e) {
+
+    if (e.target && e.target.id === 'select-search') {
+
+        const container = e.target.closest('.custom-select-container');
+
+        let timeout;
+        const query = e.target.value.trim();
+        const clientId = document.getElementById('client-select').value;
+        
+        if (query.length === 0) {
+            renderInitialList(container);
+            return;
+        }
+
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            // Замените URL на ваш эндпоинт Django
+            fetch(`/api/products/search/?client_id=${clientId}&q=${query}`)
+                .then(res => res.json())
+                .then(data => renderItems(data, container))
+                .catch(() => renderItems([], container));
+        }, 300); // задержка 300мс
+    }
+});
+
