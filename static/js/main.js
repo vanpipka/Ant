@@ -37,7 +37,7 @@ function selectItem(item, container) {
     // Здесь можно добавить логику добавления товара в заказ
     const row = container.closest('.order-row');
     const price = row.querySelector('.order-unit-price');
-    const hiddenPrice = row.querySelector('input[type="hidden"]');
+    const hiddenPrice = row.querySelector('[name="item_price"]');
     const display = container.querySelector('.select-display-trigger');
     const hiddenInput = container.querySelector('input[type="hidden"]');
     const dropdown = container.querySelector('.select-item-dropdown-menu');
@@ -263,14 +263,33 @@ document.addEventListener('click', function(e) {
     if (e.target.closest('#add-item-btn')) {
         
         const tbody = document.querySelector('#order-items-container');
+        const nextIndex = tbody.querySelectorAll('.order-row').length + 1;
         const newRow = document.createElement('tr');
         newRow.className = 'order-row';
         
         newRow.innerHTML = `
                         <td class="py-4">
-                            <div class="fw-bold"></div>
-                            <small class="text-muted"></small>
-                            <input type="hidden" name="item_product_id" value="">
+                            <div class="custom-select-container position-relative" style="max-width: 400px;">
+                                <div 
+                                    id="select-item-display-${nextIndex}" 
+                                    data-row-id="${nextIndex}"
+                                    class="select-display-trigger form-select py-3 bg-light border-0 cursor-pointer" 
+                                    style="border-radius: 12px;">
+                                    Выберите позицию
+                                </div>
+                                                    
+                                <input type="hidden" id="item_product_id_${nextIndex}" name="item_product_id" value="">
+
+                                <div 
+                                    id="select-dropdown${nextIndex}"               
+                                    class="select-item-dropdown-menu dropdown-menu shadow-lg border-0 w-100 mt-2 p-2" 
+                                    style="border-radius: 12px; display: none;">
+                                    <input type="text" id="select-search" class="form-control mb-2 p-2 border-0 bg-light" placeholder="Поиск..." autocomplete="off">
+                                                        
+                                    <div id="results-list" style="max-height: 300px; overflow-y: auto;">
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                         <td>
                             <div class="qty-control mx-auto">
@@ -279,8 +298,10 @@ document.addEventListener('click', function(e) {
                                 <button type="button" class="qty-btn">+</button>
                             </div>
                         </td>
-                        <td class="text-end fw-bold text-muted order-unit-price">
-                            0.00₽
+                        <td class="text-end fw-bold text-muted">
+                            <div class="order-unit-price">
+                                0.00₽
+                            </div>
                             <input type="hidden" name="item_price" value="0.00">    
                         </td>
                         <td class="text-end fw-bold order-unit-amount">0.00₽</td>

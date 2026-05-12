@@ -105,7 +105,7 @@
                             </div>
                         </div>
 
-                        <div class="table-responsive">
+                        <div class="">
                             <table class="table align-middle">
                                 <thead class="bg-light">
                                     <tr class="text-uppercase text-muted small fw-bold">
@@ -156,11 +156,12 @@
                                                     <button type="button" class="qty-btn">-</button>
                                                     <input type="text" name="item_quantity" class="qty-input" value="{{item.quantity}}">
                                                     <button type="button" class="qty-btn">+</button>
-                                                </div>
-                                                
+                                                </div>                                                
                                             </td>
-                                            <td class="text-end fw-bold text-muted order-unit-price">
-                                                {{item.price}}₽
+                                            <td class="text-end fw-bold text-muted ">
+                                                <div class="order-unit-price">
+                                                    {{item.price}}₽
+                                                </div>
                                                 <input type="hidden" name="item_price" value="{{item.price}}">
                                             </td>
                                             <td class="text-end fw-bold order-unit-amount">₽</td>                                         
