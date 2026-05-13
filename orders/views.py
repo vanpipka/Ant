@@ -392,7 +392,8 @@ def set_external_id(request):
         data = json.loads(request.body)
         order_id = data.get('order_id')      # Ваш внутренний ID (например, 105)
         ext_id = data.get('external_id')     # ID из 1С (например, "УТ-00001")
-
+        number = data.get('number', '') 
+        
         if not order_id or not ext_id:
             return JsonResponse({'success': False, 'error': 'Missing order_id or external_id'}, status=400)
 
@@ -403,6 +404,7 @@ def set_external_id(request):
             return JsonResponse({'success': False, 'error': f'Order with id {order_id} not found'}, status=404)    
         
         order.external_id = ext_id
+        order.number = number
         
         # Дополнительно: можно сбросить статус или пометить как "Выгружен"
         order.status = Order.Status.CONFIRMED 
