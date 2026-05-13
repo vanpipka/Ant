@@ -25,6 +25,8 @@ urlpatterns = [
     path('api/orders/update/', order_views.set_order_full, name='order_update_api'),
     path('api/products/update/', order_views.set_products_full, name='product_search_api'),
     path('api/products/search/', order_views.product_search_api, name='product_search_api'),
+    path('api/products/export/', order_views.export_orders_to_1c, name='export_1c'),
+    path('api/products/set_external_id/', order_views.set_external_id, name='set_external_id'),
     
     path("", include("orders.urls")),
     

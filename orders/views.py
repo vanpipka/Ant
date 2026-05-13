@@ -137,6 +137,10 @@ def product_search_api(request):
 @login_required 
 @require_POST
 def set_order_full(request):
+    
+    if (not request.user.is_staff):
+        return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
+    
     try:
         data = json.loads(request.body)
         
@@ -211,6 +215,7 @@ def set_order_full(request):
 @login_required   
 @transaction.atomic
 def save_order(request):
+    
     if request.method == 'POST':
         # Получаем одиночные значения
         order_id = request.POST.get('order_id')
@@ -279,6 +284,10 @@ def save_order(request):
 @login_required     
 @require_POST
 def set_products_full(request):
+    
+    if (not request.user.is_staff):
+        return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
+    
     try:
         data = json.loads(request.body)
         client_ext_id = data.get('client_id')
@@ -326,3 +335,90 @@ def set_products_full(request):
         return JsonResponse({'success': False, 'error': 'Ошибка формата JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+    
+@login_required # Обязательно защищаем данные
+def export_orders_to_1c(request):
+    
+    if (not request.user.is_staff):
+        return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
+      
+    # Получаем все заказы в статусе SENT
+    # Используем prefetch_related для оптимизации запросов к товарам
+    orders = Order.objects.filter(status=Order.Status.SENT).filter(external_id="").prefetch_related('items')
+
+    data = []
+    for order in orders:
+        # Формируем список товаров для каждого заказа
+        order_items = []
+        for item in order.items.all():
+            order_items.append({
+                'product_id': item.product_id,
+                'product_name': item.name, 
+                'quantity': float(item.quantity),
+                'price': float(item.price),
+                'sum': float(item.quantity * item.price),
+            })
+
+        # Формируем структуру заказа
+        data.append({
+            'order_id': order.id,
+            'order_external_id': order.external_id,           
+            'date': order.date.strftime('%Y-%m-%d %H:%M:%S'),
+            'user_id': order.user.external_id if order.user else None,
+            'client_id': order.client.external_id,
+            'address': order.address,
+            'total_amount': float(order.total_amount),
+            'description': order.description or "",
+            'items': order_items, # Вложенный список товаров
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'count': len(data),
+        'orders': data
+    }, safe=False, json_dumps_params={'ensure_ascii': False}) # Чтобы кириллица была читаемой
+    
+
+@login_required
+def set_external_id(request):
+    
+    if (not request.user.is_staff):
+        return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Only POST allowed'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        order_id = data.get('order_id')      # Ваш внутренний ID (например, 105)
+        ext_id = data.get('external_id')     # ID из 1С (например, "УТ-00001")
+
+        if not order_id or not ext_id:
+            return JsonResponse({'success': False, 'error': 'Missing order_id or external_id'}, status=400)
+
+        # Ищем заказ и обновляем его
+        order = Order.objects.get(id=order_id)
+        
+        if (not order):
+            return JsonResponse({'success': False, 'error': f'Order with id {order_id} not found'}, status=404)    
+        
+        order.external_id = ext_id
+        
+        # Дополнительно: можно сбросить статус или пометить как "Выгружен"
+        order.status = Order.Status.CONFIRMED 
+        
+        try:
+            order.save()
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f'{e}'}, status=404)     
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Order {order_id} updated with external ID {ext_id}'
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
