@@ -345,7 +345,7 @@ def export_orders_to_1c(request):
       
     # Получаем все заказы в статусе SENT
     # Используем prefetch_related для оптимизации запросов к товарам
-    orders = Order.objects.filter(status=Order.Status.SENT).filter(external_id="").prefetch_related('items')
+    orders = Order.objects.filter(status=Order.Status.SENT, external_id__isnull=True).prefetch_related('items')
 
     data = []
     for order in orders:
