@@ -363,7 +363,7 @@ def export_orders_to_1c(request):
         # Формируем структуру заказа
         data.append({
             'order_id': order.id,         
-            'date': order.date.strftime('%Y-%m-%d %H:%M:%S'),
+            'date': order.date.strftime('%d%m%Y%H%M%S'),
             'user_id': order.user.external_id if order.user else None,
             'client_id': order.client.external_id,
             'address': order.address,
