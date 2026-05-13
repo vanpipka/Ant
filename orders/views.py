@@ -362,8 +362,7 @@ def export_orders_to_1c(request):
 
         # Формируем структуру заказа
         data.append({
-            'order_id': order.id,
-            'order_external_id': order.external_id,           
+            'order_id': order.id,         
             'date': order.date.strftime('%Y-%m-%d %H:%M:%S'),
             'user_id': order.user.external_id if order.user else None,
             'client_id': order.client.external_id,
@@ -374,7 +373,7 @@ def export_orders_to_1c(request):
         })
 
     return JsonResponse({
-        'status': 'success',
+        'success': True,
         'count': len(data),
         'orders': data
     }, safe=False, json_dumps_params={'ensure_ascii': False}) # Чтобы кириллица была читаемой
