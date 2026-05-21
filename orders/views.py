@@ -14,7 +14,7 @@ import json
 
 from accounts.models import Client
 from accounts.models import ClientAddress
-from orders.models import Order, OrderItem, Product, ProductImage
+from orders.models import Order, OrderItem, Product, ProductImage, ClientPrice
 from .services import OrderService
 
 User = get_user_model()
@@ -318,10 +318,8 @@ def save_product(request, product_id):
 
 @login_required     
 @require_POST
-def set_products_full(request):
+def set_client_prices(request, client_id):
     
-    return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
-
     if (not request.user.is_staff):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
     
@@ -332,17 +330,13 @@ def set_products_full(request):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
               
-    # client_ext_id = data.get('client_id')
     items = data.get('items', [])
 
-    # if not client_ext_id:
-    #    return JsonResponse({'success': False, 'error': 'Не указан client_id'}, status=400)
-
     # Находим клиента
-    # try:
-    #     client = Client.objects.get(external_id=client_ext_id)
-    # except Client.DoesNotExist:
-    #     return JsonResponse({'success': False, 'error': f'Клиент {client_ext_id} не найден'}, status=404)
+    try:
+        client = Client.objects.get(external_id=client_id)
+    except Client.DoesNotExist:
+        return JsonResponse({'success': False, 'error': f'Клиент {client_id} не найден'}, status=404)
 
     with transaction.atomic():
         # 1. Собираем список product_id, которые прислала 1С
@@ -350,21 +344,25 @@ def set_products_full(request):
 
         # 2. Удаляем те товары клиента, которых нет в пришедшем списке
         # Это и есть механизм очистки лишних строк
-        # Product.objects.filter(client=client).exclude(product_id__in=incoming_product_ids).delete()
+        ClientPrice.objects.filter(client=client).exclude(product_id__in=incoming_product_ids).delete()
 
         # 3. Обновляем существующие или создаем новые товары
         for item_data in items:
             p_id = item_data.get('product_id')
             if not p_id:
                 continue
+            
+            try:
+                product = Product.objects.get(external_id=p_id)
+            except Product.DoesNotExist:
+                continue
                 
             # update_or_create вызовет наш метод save() и обновит search_name автоматически
             Product.objects.update_or_create(
-                # client=client,
-                product_id=p_id,
+                client=client,
+                product=product,
                 defaults={
-                    'name': item_data.get('name', ''),
-                    # 'price': Decimal(str(item_data.get('price', 0))),
+                    'price': Decimal(str(item_data.get('price', 0))),
                 }
             )
 
@@ -372,9 +370,7 @@ def set_products_full(request):
         'success': True, 
         'message': f'Синхронизация завершена. Обработано товаров: {len(incoming_product_ids)}'
     })
-
-    
-    
+ 
     
 @login_required # Обязательно защищаем данные
 def export_orders_to_1c(request):
@@ -484,7 +480,8 @@ def upload_product_image(request):
     try:
         img = ProductImage.objects.get(external_id = img_id)       
         if img:
-            return JsonResponse({'success': True}, status=200)  
+            return JsonResponse({'success': True, 'message': 'Файл был загружен ранее'}, status=200)  
+    
     except ProductImage.DoesNotExist:
         ... 
     

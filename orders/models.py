@@ -66,16 +66,12 @@ class OrderItem(models.Model):
 
 class Product(models.Model):
     
-    # client = models.ForeignKey(Client, related_name="products", on_delete=models.CASCADE, null=True, blank=True)
     product_id = models.CharField(max_length=64)
     name = models.CharField(max_length=255)
     unit = models.CharField(max_length=5, default="")
-    article = models.CharField(max_length=15, default="")
-    
+    article = models.CharField(max_length=15, default="")  
     search_name = models.CharField(max_length=255, db_index=True, blank=True, editable=False)
 
-    # price = models.DecimalField(max_digits=12, decimal_places=2)
-    
     def save(self, *args, **kwargs):
         # Автоматически переводим имя в нижний регистр перед сохранением
         if self.name:

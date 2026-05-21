@@ -85,7 +85,7 @@ class ProductAdmin(admin.ModelAdmin):
     # Группировка полей в самой карточке товара
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'product_id')
+            'fields': ('name', 'product_id', 'unit', 'article')
         }),
     )
     
