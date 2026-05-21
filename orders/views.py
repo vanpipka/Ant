@@ -438,8 +438,12 @@ def upload_product_image(request):
     if not product_id:
         return JsonResponse({'success': False, 'error': 'Missing product_id parameter'}, status=400)
     
+    img_id = request.GET.get('img_id')
+    if not product_id:
+        return JsonResponse({'success': False, 'error': 'Missing img_id parameter'}, status=400)
+    
     try:
-        img = ProductImage.objects.get(product_id = product_id)       
+        img = ProductImage.objects.get(external_id = img_id)       
         if img:
             return JsonResponse({'success': True}, status=200)  
     except ProductImage.DoesNotExist:
@@ -463,6 +467,7 @@ def upload_product_image(request):
     # 5. Сохраняем в нашу модель ProductImage
     new_image = ProductImage.objects.create(
         product_id=product_id,
+        external_id=img_id,
         image=django_file
     )
 
