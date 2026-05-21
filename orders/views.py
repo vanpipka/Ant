@@ -420,9 +420,9 @@ def set_external_id(request):
         })
 
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
     
 @login_required   
 def upload_product_image(request):
@@ -431,16 +431,21 @@ def upload_product_image(request):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
        
     if request.method != 'POST':
-        return JsonResponse({'error': 'Only POST allowed'}, status=405)
+        return JsonResponse({'success': False, 'error': 'Only POST allowed'}, status=405)
 
     product_id = request.POST.get('product_id')
     if not product_id:
-        return JsonResponse({'error': 'Missing SKU parameter'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Missing SKU parameter'}, status=400)
 
     if 'image' not in request.FILES:
-        return JsonResponse({'error': 'No image file provided'}, status=400)
+        return JsonResponse({'success': False, 'error': 'No image file provided'}, status=400)
 
     image_file = request.FILES['image']
+    
+    img =ProductImage.objects.get(product_id = product_id)
+    
+    if img:
+        return JsonResponse({'success': True}, status=200)    
     
     # удалим старые изображения
     ProductImage.objects.filter(product_id = product_id).delete()
@@ -452,7 +457,7 @@ def upload_product_image(request):
     )
 
     return JsonResponse({
-        'status': 'success',
+        'success': True, 
         'message': f'Image successfully added to product {product_id}',
         'image_id': new_image.id
     })
