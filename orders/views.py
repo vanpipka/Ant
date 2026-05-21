@@ -358,7 +358,7 @@ def set_client_prices(request, client_id):
                 continue
                 
             # update_or_create вызовет наш метод save() и обновит search_name автоматически
-            Product.objects.update_or_create(
+            ClientPrice.objects.update_or_create(
                 client=client,
                 product=product,
                 defaults={
