@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderItem, Product, ProductImage
+from .models import Order, OrderItem, Product, ProductImage, ClientPrice
 
 class OrderItemInline(admin.TabularInline):
     """Позволяет редактировать товары прямо в карточке заказа"""
@@ -93,3 +93,8 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ('product_id', 'image', 'preview_img')
+    
+    
+@admin.register(ClientPrice)
+class ClientPriceAdmin(admin.ModelAdmin):
+    list_display = ('client', 'product', 'price')
