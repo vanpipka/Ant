@@ -353,7 +353,7 @@ def set_client_prices(request, client_id):
                 continue
             
             try:
-                product = Product.objects.get(external_id=p_id)
+                product = Product.objects.get(product_id=p_id)
             except Product.DoesNotExist:
                 continue
                 
