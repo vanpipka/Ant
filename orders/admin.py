@@ -71,11 +71,10 @@ class OrderItemAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     # Поля, которые будут отображаться в списке товаров
-    list_display = ('product_id', 'name')
+    list_display = ('product_id', 'name', 'unit', 'article')
     
     # Поля, по которым можно кликнуть для перехода к редактированию
-    list_display_links = ('product_id', 'name')
-    
+    list_display_links = ('product_id', 'name')  
     
     # Поиск по названию, внутреннему ID и имени клиента (через __name)
     search_fields = ('name', 'product_id')
