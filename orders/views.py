@@ -446,7 +446,7 @@ def upload_product_image(request):
         ... 
     
     # удалим старые изображения
-    # ProductImage.objects.filter(product_id = product_id).delete()
+    ProductImage.objects.filter(product_id = product_id).delete()
 
     binary_data = request.body
     if not binary_data:
