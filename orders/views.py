@@ -13,7 +13,7 @@ import json
 
 from accounts.models import Client
 from accounts.models import ClientAddress
-from orders.models import Order, OrderItem, Product
+from orders.models import Order, OrderItem, Product, ProductImage
 from .services import OrderService
 
 User = get_user_model()
@@ -423,3 +423,36 @@ def set_external_id(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+@login_required   
+def upload_product_image(request):
+ 
+    if (not request.user.is_staff):
+        return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
+       
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST allowed'}, status=405)
+
+    product_id = request.POST.get('product_id')
+    if not product_id:
+        return JsonResponse({'error': 'Missing SKU parameter'}, status=400)
+
+    if 'image' not in request.FILES:
+        return JsonResponse({'error': 'No image file provided'}, status=400)
+
+    image_file = request.FILES['image']
+    
+    # удалим старые изображения
+    ProductImage.objects.filter(product_id = product_id).delete()
+
+    # Создаем новую запись в таблице изображений
+    new_image = ProductImage.objects.create(
+        product_id=product_id,
+        image=image_file
+    )
+
+    return JsonResponse({
+        'status': 'success',
+        'message': f'Image successfully added to product {product_id}',
+        'image_id': new_image.id
+    })

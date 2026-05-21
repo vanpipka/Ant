@@ -81,3 +81,26 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+class ProductImage(models.Model):
+
+    product_id = models.CharField(max_length=64)
+    external_id = models.CharField(max_length=64, null=True, blank=True)  # ID из 1С
+    
+    # Поле для загрузки картинки. Файлы будут сохраняться в папку media/products/
+    image = models.ImageField(
+        upload_to='products/', 
+        verbose_name="Изображение"
+    )
+    
+    # Автоматически сохраняем дату добавления (полезно для сортировки)
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True, 
+        verbose_name="Дата загрузки"
+    )
+
+    class Meta:
+        verbose_name = "Изображение товара"
+        verbose_name_plural = "Изображения товаров"
+        ordering = ['-uploaded_at'] # Новые фото будут отображаться первыми
