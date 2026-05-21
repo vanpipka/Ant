@@ -344,7 +344,7 @@ def set_client_prices(request, client_id):
 
         # 2. Удаляем те товары клиента, которых нет в пришедшем списке
         # Это и есть механизм очистки лишних строк
-        ClientPrice.objects.filter(client=client).exclude(product_id__in=incoming_product_ids).delete()
+        ClientPrice.objects.filter(client=client).exclude(product_product_id__in=incoming_product_ids).delete()
 
         # 3. Обновляем существующие или создаем новые товары
         for item_data in items:
