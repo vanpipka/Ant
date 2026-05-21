@@ -5,6 +5,7 @@ import random
 
 from .models import Order, OrderItem
 
+
 class OrderService:
 
     @staticmethod
@@ -64,8 +65,10 @@ class OrderService:
         
         # return Order.objects.filter(client__in=user.clients.all()).order_by('-created_at')    
             
+
 def get_status_from_1c(external_id):
     return "Подтвержден"  # Заглушка, в реальной жизни - HTTP запрос к 1С
+
 
 def send_to_1c(payload):
     return {

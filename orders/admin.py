@@ -8,6 +8,7 @@ class OrderItemInline(admin.TabularInline):
     readonly_fields = ('total',) # Рассчитывается автоматически, лучше запретить ручной ввод
     fields = ('product_id', 'name', 'quantity', 'price', 'total')
 
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     # Список полей, которые видны в таблице заказов
@@ -70,35 +71,24 @@ class OrderItemAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     # Поля, которые будут отображаться в списке товаров
-    list_display = ('product_id', 'name', 'client', 'price')
+    list_display = ('product_id', 'name')
     
     # Поля, по которым можно кликнуть для перехода к редактированию
     list_display_links = ('product_id', 'name')
     
-    # Фильтры в правой колонке (очень полезно, если клиентов много)
-    list_filter = ('client',)
     
     # Поиск по названию, внутреннему ID и имени клиента (через __name)
-    search_fields = ('name', 'product_id', 'client__name')
-    
-    # Позволяет редактировать цену прямо в списке, не заходя в карточку товара
-    list_editable = ('price',)
+    search_fields = ('name', 'product_id')
     
     # Упорядочивание по умолчанию
-    ordering = ('client', 'name')
+    ordering = ('name',)
     
     # Группировка полей в самой карточке товара
     fieldsets = (
         ('Основная информация', {
-            'fields': ('client', 'name', 'product_id')
-        }),
-        ('Ценообразование', {
-            'fields': ('price',),
+            'fields': ('name', 'product_id')
         }),
     )
-
-    # Опционально: если вы хотите ускорить выбор клиента (если их тысячи)
-    raw_id_fields = ('client',)
     
     
 @admin.register(ProductImage)

@@ -51,6 +51,7 @@ class OrderListView(LoginRequiredMixin, ListView):
         # Добавляем инфо о количестве для футера (как на макете)
         context['total_count'] = len(self.get_queryset())
         return context
+   
     
 @login_required 
 def order_modal_handler(request, pk=None):
@@ -284,58 +285,93 @@ def save_order(request):
 
 @login_required     
 @require_POST
-def set_products_full(request):
-    
+def save_product(request, product_id):
     if (not request.user.is_staff):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
     
     try:
         data = json.loads(request.body)
-        client_ext_id = data.get('client_id')
-        items = data.get('items', [])
-
-        if not client_ext_id:
-            return JsonResponse({'success': False, 'error': 'Не указан client_id'}, status=400)
-
-        # Находим клиента
-        try:
-            client = Client.objects.get(external_id=client_ext_id)
-        except Client.DoesNotExist:
-            return JsonResponse({'success': False, 'error': f'Клиент {client_ext_id} не найден'}, status=404)
-
-        with transaction.atomic():
-            # 1. Собираем список product_id, которые прислала 1С
-            incoming_product_ids = [str(item.get('product_id')) for item in items if item.get('product_id')]
-
-            # 2. Удаляем те товары клиента, которых нет в пришедшем списке
-            # Это и есть механизм очистки лишних строк
-            Product.objects.filter(client=client).exclude(product_id__in=incoming_product_ids).delete()
-
-            # 3. Обновляем существующие или создаем новые товары
-            for item_data in items:
-                p_id = item_data.get('product_id')
-                if not p_id:
-                    continue
-                
-                # update_or_create вызовет наш метод save() и обновит search_name автоматически
-                Product.objects.update_or_create(
-                    client=client,
-                    product_id=p_id,
-                    defaults={
-                        'name': item_data.get('name', ''),
-                        'price': Decimal(str(item_data.get('price', 0))),
-                    }
-                )
-
-        return JsonResponse({
-            'success': True, 
-            'message': f'Синхронизация завершена. Обработано товаров: {len(incoming_product_ids)}'
-        })
-
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Ошибка формата JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+    name = data.get('name', '')
+    
+    if not product_id:
+        return JsonResponse({'success': False, 'error': 'Поле external_id обязательно'}, status=500)  
+    
+    if not name:
+        return JsonResponse({'success': False, 'error': 'Поле name обязательно'}, status=500)   
+    
+    product = Product.objects.update_or_create(
+        product_id=product_id,
+        defaults={'name': name,})
+    
+    return JsonResponse({
+        'success': True, 
+        'id': product.id,
+    })
+    
+
+@login_required     
+@require_POST
+def set_products_full(request):
+    
+    return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
+
+    if (not request.user.is_staff):
+        return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Ошибка формата JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+              
+    # client_ext_id = data.get('client_id')
+    items = data.get('items', [])
+
+    # if not client_ext_id:
+    #    return JsonResponse({'success': False, 'error': 'Не указан client_id'}, status=400)
+
+    # Находим клиента
+    # try:
+    #     client = Client.objects.get(external_id=client_ext_id)
+    # except Client.DoesNotExist:
+    #     return JsonResponse({'success': False, 'error': f'Клиент {client_ext_id} не найден'}, status=404)
+
+    with transaction.atomic():
+        # 1. Собираем список product_id, которые прислала 1С
+        incoming_product_ids = [str(item.get('product_id')) for item in items if item.get('product_id')]
+
+        # 2. Удаляем те товары клиента, которых нет в пришедшем списке
+        # Это и есть механизм очистки лишних строк
+        # Product.objects.filter(client=client).exclude(product_id__in=incoming_product_ids).delete()
+
+        # 3. Обновляем существующие или создаем новые товары
+        for item_data in items:
+            p_id = item_data.get('product_id')
+            if not p_id:
+                continue
+                
+            # update_or_create вызовет наш метод save() и обновит search_name автоматически
+            Product.objects.update_or_create(
+                # client=client,
+                product_id=p_id,
+                defaults={
+                    'name': item_data.get('name', ''),
+                    # 'price': Decimal(str(item_data.get('price', 0))),
+                }
+            )
+
+    return JsonResponse({
+        'success': True, 
+        'message': f'Синхронизация завершена. Обработано товаров: {len(incoming_product_ids)}'
+    })
+
+    
     
     
 @login_required # Обязательно защищаем данные
@@ -424,6 +460,7 @@ def set_external_id(request):
         return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
     
 @login_required   
 def upload_product_image(request):
