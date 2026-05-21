@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderItem, Product
+from .models import Order, OrderItem, Product, ProductImage
 
 class OrderItemInline(admin.TabularInline):
     """Позволяет редактировать товары прямо в карточке заказа"""
@@ -99,3 +99,8 @@ class ProductAdmin(admin.ModelAdmin):
 
     # Опционально: если вы хотите ускорить выбор клиента (если их тысячи)
     raw_id_fields = ('client',)
+    
+    
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ('product_id', 'image')
