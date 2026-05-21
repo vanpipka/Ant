@@ -90,7 +90,7 @@ class ProductImage(models.Model):
     
     # Поле для загрузки картинки. Файлы будут сохраняться в папку media/products/
     image = models.ImageField(
-        upload_to='products/', 
+        upload_to='img/products/', 
         verbose_name="Изображение"
     )
     

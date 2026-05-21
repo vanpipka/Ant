@@ -144,3 +144,8 @@ STATICFILES_DIRS = [
 
 # Папка, куда соберется вся статика при команде collectstatic (для продакшена)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = 'media/'
+
+# Абсолютный путь к папке на сервере, куда Django будет физически сохранять файлы
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
