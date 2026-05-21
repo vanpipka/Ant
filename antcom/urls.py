@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/products/search/', order_views.product_search_api, name='product_search_api'),
     path('api/products/export/', order_views.export_orders_to_1c, name='export_1c'),
     path('api/products/set_external_id/', order_views.set_external_id, name='set_external_id'),
+    path('api/products/upload-image/', order_views.upload_product_image, name='upload_product_image'),
     
     path("", include("orders.urls")),
     
