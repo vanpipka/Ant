@@ -433,9 +433,9 @@ def upload_product_image(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Only POST allowed'}, status=405)
 
-    product_id = request.POST.get('product_id')
+    product_id = request.GET.get('product_id')
     if not product_id:
-        return JsonResponse({'success': False, 'error': 'Missing SKU parameter'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Missing product_id parameter'}, status=400)
 
     if 'image' not in request.FILES:
         return JsonResponse({'success': False, 'error': 'No image file provided'}, status=400)
