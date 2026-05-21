@@ -7,6 +7,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.http import HttpResponseNotFound, JsonResponse
 from decimal import Decimal
+from django.core.files.base import ContentFile
 from django.db import transaction
 
 import json
@@ -436,13 +437,8 @@ def upload_product_image(request):
     product_id = request.GET.get('product_id')
     if not product_id:
         return JsonResponse({'success': False, 'error': 'Missing product_id parameter'}, status=400)
-
-    if 'image' not in request.FILES:
-        return JsonResponse({'success': False, 'error': 'No image file provided'}, status=400)
-
-    image_file = request.FILES['image']
     
-    img =ProductImage.objects.get(product_id = product_id)
+    img = ProductImage.objects.get(product_id = product_id)
     
     if img:
         return JsonResponse({'success': True}, status=200)    
@@ -450,14 +446,26 @@ def upload_product_image(request):
     # удалим старые изображения
     ProductImage.objects.filter(product_id = product_id).delete()
 
-    # Создаем новую запись в таблице изображений
+    binary_data = request.body
+    if not binary_data:
+        return JsonResponse({'success': False, 'error': 'Empty request body'}, status=400)
+
+    # 3. Генерируем имя файла (например, на основе ID товара)
+    # По хорошему можно вытащить расширение из заголовка Content-Type,
+    # но для простоты сохраняем как .jpg
+    filename = f"product_{product_id}_uploaded.jpg"
+
+    # 4. Создаем объект файла Django из байтов
+    django_file = ContentFile(binary_data, name=filename)
+
+    # 5. Сохраняем в нашу модель ProductImage
     new_image = ProductImage.objects.create(
         product_id=product_id,
-        image=image_file
+        image=django_file
     )
 
     return JsonResponse({
-        'success': True, 
-        'message': f'Image successfully added to product {product_id}',
+        'success': True,
+        'message': f'Image successfully added to product ID {product_id}',
         'image_id': new_image.id
     })
