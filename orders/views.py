@@ -304,7 +304,7 @@ def save_product(request, product_id):
     if not name:
         return JsonResponse({'success': False, 'error': 'Поле name обязательно'}, status=500)   
     
-    product = Product.objects.update_or_create(
+    product, created = Product.objects.update_or_create(
         product_id=product_id,
         defaults={'name': name,})
     
