@@ -1,9 +1,10 @@
-
+import os
+from io import BytesIO
 from django.utils import timezone
-
+from django.core.files.base import ContentFile
 from django.db import models
-
 from accounts.models import Client
+from PIL import Image
 
 
 class Order(models.Model):
@@ -90,15 +91,46 @@ class ProductImage(models.Model):
     
     # Поле для загрузки картинки. Файлы будут сохраняться в папку media/products/
     image = models.ImageField(
-        upload_to='img/products/', 
-        verbose_name="Изображение"
-    )
+        upload_to='img/products/original', verbose_name="Изображение")
+    
+    preview_img = models.ImageField(
+        upload_to='img/products/preview', null=True, blank=True)
     
     # Автоматически сохраняем дату добавления (полезно для сортировки)
     uploaded_at = models.DateTimeField(
         auto_now_add=True, 
         verbose_name="Дата загрузки"
     )
+    
+    def save(self, *args, **kwargs):
+        # 1. Сначала проверяем, загружено ли вообще изображение
+        if self.image and not self.preview_img:
+            # 2. Открываем оригинальную картинку через Pillow
+            img = Image.open(self.image)
+            
+            # Конвертируем в RGB, если это PNG/RGBA (чтобы корректно сохранить в JPEG)
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+            
+            # 3. Делаем crop/resize с сохранением пропорций (метод thumbnail)
+            # Если картинка прямоугольная, thumbnail сожмет её по большей стороне, например 100x75
+            img.thumbnail((100, 100), Image.Resampling.LANCZOS)
+            
+            # 4. Сохраняем сжатую картинку в байтовый поток в памяти
+            temp_thumb = BytesIO()
+            img.save(temp_thumb, format='JPEG', quality=85) # Оптимальное качество
+            temp_thumb.seek(0)
+            
+            # 5. Присваиваем файловому полю имя и данные из памяти
+            # Берем базовое имя оригинального файла
+            filename = os.path.basename(self.image.name)
+            thumb_filename = f"thumb_{filename}"
+            
+            self.preview_img.save(thumb_filename, ContentFile(temp_thumb.read()), save=False)
+            temp_thumb.close()
+
+        # Вызываем стандартный метод save для записи в базу
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Изображение товара"
