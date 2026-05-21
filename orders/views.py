@@ -438,10 +438,12 @@ def upload_product_image(request):
     if not product_id:
         return JsonResponse({'success': False, 'error': 'Missing product_id parameter'}, status=400)
     
-    img = ProductImage.objects.get(product_id = product_id)
-    
-    if img:
-        return JsonResponse({'success': True}, status=200)    
+    try:
+        img = ProductImage.objects.get(product_id = product_id)       
+        if img:
+            return JsonResponse({'success': True}, status=200)  
+    except Product.DoesNotExist:
+        ... 
     
     # удалим старые изображения
     ProductImage.objects.filter(product_id = product_id).delete()
