@@ -6,9 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.http import HttpResponseNotFound, JsonResponse
-from decimal import Decimal
+from django.db.models import F, OuterRef, Subquery
 from django.core.files.base import ContentFile
 from django.db import transaction
+from decimal import Decimal
+
 
 import json
 
@@ -51,7 +53,43 @@ class OrderListView(LoginRequiredMixin, ListView):
         # Добавляем инфо о количестве для футера (как на макете)
         context['total_count'] = len(self.get_queryset())
         return context
-   
+  
+
+class ProductListView(LoginRequiredMixin, ListView):
+    model = Product
+    template_name = 'products/product_list.html'
+    context_object_name = 'products'
+    paginate_by = 3 # Опционально: постраничный вывод
+
+    def get_queryset(self):
+        # 1. Получаем текущего клиента через авторизованного юзера.
+        try:
+            current_client = self.request.user.clients.all()[0]
+        except AttributeError:
+            # Если у пользователя нет привязанного клиента, отдаем пустой список
+            return Product.objects.none()
+        
+        image_subquery = ProductImage.objects.filter(
+            product_id=OuterRef('product_id')
+        ).values('image')[:1]
+        
+        preview_subquery = ProductImage.objects.filter(
+            product_id=OuterRef('product_id')
+        ).values('preview_img')[:1]
+
+        # 2. Оптимальный вариант: Фильтруем продукты, у которых есть цена для клиента,
+        # и сразу добавляем эту цену как виртуальное поле `client_price` к каждому объекту.
+        queryset = Product.objects.filter(
+            client_prices__client=current_client
+        ).annotate(
+            client_price=F('client_prices__price'),
+            # Добавляем динамические поля (строки с относительным путем к файлам медиа)
+            annotated_image=Subquery(image_subquery),
+            annotated_preview=Subquery(preview_subquery)
+        ).order_by('name')
+
+        return queryset
+    
     
 @login_required 
 def order_modal_handler(request, pk=None):

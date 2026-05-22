@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Список заказов{% endblock %}
+
+{% block content %}
+<div class="main-container">
+
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Картинка</th>
+                <th>Артикул</th>
+                <th>Наименование товара</th>
+                <th>Ед. изм.</th>
+                <th>Ваша цена</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>
+                        <div class="me-3 position-relative" style="width: 56px; height: 56px; flex-shrink: 0;">
+                            {% if product.annotated_preview %}
+                                <img src="{{ MEDIA_URL }}{{ product.annotated_preview }}" 
+                                    data-full-src="{{ MEDIA_URL }}{{ product.annotated_image }}"
+                                    class="img-fluid rounded-3 cp-zoom-trigger" 
+                                    alt="{{ product.name }}"
+                                    style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;">
+                            {% else %}
+                                <div class="d-flex align-items-center justify-content-center h-100 w-100 rounded-3" 
+                                    style="background-color: #eaf7f7; color: #1abc9c;">
+                                    <i class="bi bi-box-seam fs-4"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>{{ product.article }}</td>
+                    <td><strong>{{ product.name }}</strong></td>
+                    <td>{{ product.unit }}</td>
+                    <td>
+                        <span class="text-success fw-bold">{{ product.client_price|floatformat:2}}₽</span>
+                    </td>
+                    <td class="text-end">
+                        <ul class="nav nav-pills">
+                            <li class="nav-item">
+                                
+                                <button class="icon-link nav-link">
+                                    <i class="bi bi-cart4"></i>
+                                    в заказ</a>
+                            </button>
+                        </ul>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        Нет доступных товаров с назначенными ценами.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if is_paginated %}
+        <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted small">
+                
+            </div>
+            <ul class="pagination mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0 position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1060;"></button>
+                <div class="modal-body p-0 text-center">
+                    <img src="" id="modalFullImage" class="img-fluid rounded-3 shadow-lg" alt="Полное изображение" style="max-height: 85vh;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

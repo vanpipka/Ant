@@ -561,3 +561,26 @@ document.addEventListener('input', function(e) {
     }
 });
 
+
+document.addEventListener('DOMContentLoaded', function () {
+    
+    const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+    const modalImage = document.getElementById('modalFullImage');
+
+    // Делегирование событий (работает даже если строки товаров добавляются динамически через JS!)
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('cp-zoom-trigger')) {
+            const fullSizeSrc = e.target.getAttribute('data-full-src');
+            
+            if (fullSizeSrc) {
+                modalImage.src = fullSizeSrc; // Устанавливаем тяжелую картинку
+                previewModal.show();         // Показываем окно
+            }
+        }
+    });
+    
+    // Очищаем src после закрытия модалки, чтобы при следующем открытии не моргало старое фото
+    document.getElementById('imagePreviewModal').addEventListener('hidden.bs.modal', function () {
+        modalImage.src = '';
+    });
+});

@@ -352,3 +352,24 @@ body {
 .trash-btn:hover {
     color: #ef4444; /* Красный при наведении */
 }
+
+.nav-pills .nav-link {
+    background: none;
+    border: 0;
+    border-radius: 6px;
+}
+
+.nav-pills .nav-link.active {
+    color: #f1f5f9;
+    background-color: var(--primary-teal);
+}
+
+.nav-link {
+    display: block;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted-color);
+    text-decoration: none;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+}
