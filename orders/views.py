@@ -59,7 +59,7 @@ class ProductListView(LoginRequiredMixin, ListView):
     model = Product
     template_name = 'products/product_list.html'
     context_object_name = 'products'
-    paginate_by = 3 # Опционально: постраничный вывод
+    paginate_by = 25 # Опционально: постраничный вывод
 
     def get_queryset(self):
         # 1. Получаем текущего клиента через авторизованного юзера.
