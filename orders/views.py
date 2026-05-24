@@ -349,7 +349,7 @@ def save_order(request):
             subtotal = qty * price
             
             try:
-                product = Product.objects.get(client_id=client_id, product_id=product_id)
+                product = Product.objects.get(product_id=product_id)
                 
                 OrderItem.objects.create(
                     order=order,
