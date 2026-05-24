@@ -1,4 +1,6 @@
 
+{% load static %}
+
       <div class="modal-header">
             <div class="text-start">
                 <h3 class="fw-bold mb-0"  id="orderModalLabel">ЗАКАЗ</h3>
@@ -189,13 +191,23 @@
                                         <tr>
                                             <!-- colspan="5" чтобы растянуть ячейку на всю ширину таблицы -->
                                             <td colspan="5" class="text-center py-4">
-                
+                                            <!--
                                                 <button type="button" 
                                                             class="btn btn-link fw-bold text-decoration-none shadow-none" 
                                                             id="add-item-btn"
                                                             style="color: var(--primary-teal);">
                                                     <i class="bi bi-plus-lg me-1"></i> Добавить позицию
-                                                </button>                                             
+                                                </button>   
+                                            -->   
+                                                <button type="button" 
+                                                            class="btn btn-link fw-bold text-decoration-none shadow-none" 
+                                                            id = "add-item-btn-offcanvas"
+                                                            data-bs-toggle="offcanvas" 
+                                                            data-bs-target="#offcanvasRight" 
+                                                            aria-controls="offcanvasRight"
+                                                            style="color: var(--primary-teal);">
+                                                    <i class="bi bi-plus-lg me-1"></i> Добавить позицию
+                                                </button>                                        
                                             </td>
                                         </tr>
                                     </tfoot>
@@ -246,25 +258,29 @@
 
 
 {% if order.status == 'draft' %}
-<div class="modal fade" id="productPickerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Выберите товар</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Поиск -->
-                <div class="input-group mb-3">
-                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" id="product-search-input" class="form-control" placeholder="Поиск по наименованию...">
-                </div>
-                <!-- Список товаров -->
-                <div class="list-group" id="product-list-results" style="max-height: 400px; overflow-y: auto;">
-                    <!-- Сюда JS вставит товары -->
-                </div>
-            </div>
+
+<div style="min-width: 50%" class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasRightLabel">Подбор номенклатуры</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column" style="height: 100%;">
+        
+        <div class="input-group mb-3">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" id="product-search-input" class="form-control" placeholder="Поиск по наименованию...">
         </div>
+        
+        <div class="list-group flex-grow-1" id="product-list-results" style="overflow-y: auto;">
+            </div>
+
+        <div id="pagination-loader" class="text-center py-2 text-muted" style="font-size: 0.9rem; display: none;">
+            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Загрузка товаров...
+        </div>
+        <div id="pagination-end" class="text-center py-2 text-muted" style="font-size: 0.9rem; display: none;">
+            Все доступные товары загружены
+        </div>
+
     </div>
 </div>
 
@@ -301,6 +317,7 @@
         </div>
     </div>
 </div>
+
 {% endif %}
 
   

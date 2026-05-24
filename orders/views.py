@@ -3,14 +3,13 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.files.base import ContentFile
 from django.http import HttpResponseNotFound, JsonResponse
 from django.db.models import F, OuterRef, Subquery
-from django.core.files.base import ContentFile
 from django.db import transaction
 from decimal import Decimal
-
 
 import json
 
@@ -150,28 +149,77 @@ def product_search_api(request):
     
     query = request.GET.get('q', '').strip().lower()
     client_id = request.GET.get('client_id', '').strip().lower()
+    page_number = request.GET.get('page', 1) # Получаем параметры пагинации из URL (например: /api/products/?page=2&page_size=20)
+    page_size = request.GET.get('page_size', 20) # По умолчанию 20 товаров на страницу
     
+    try:       
+        client = request.user.clients.all().filter(id=client_id)[0]
+    except AttributeError:
+        return JsonResponse({'error': 'User is not associated with any client'}, status=400)   
+    
+    # Защита от некорректного ввода page_size
+    try:
+        page_size = int(page_size)
+        if page_size <= 0:
+            page_size = 20
+    except ValueError:
+        page_size = 20
+        
     # Базовый кверисет активных товаров
-    products = Product.objects.filter(client_id=client_id)
+    products = Product.objects.filter(client_prices__client=client)
     
     if query:
     # Ищем по имени или по артикулу (product_id)
         products = products.filter(search_name__icontains=query)
+        
+    #image_subquery = ProductImage.objects.filter(
+    #        product_id=OuterRef('product_id')
+    #    ).values('image')[:1]
+        
+    preview_subquery = ProductImage.objects.filter(
+            product_id=OuterRef('product_id')
+        ).values('preview_img')[:1]
     
-    # Берем первые 20 результатов, чтобы не перегружать модалку
-    products = products[:20]
+    products = products.annotate(
+        client_price=F('client_prices__price'),
+        #annotated_image=Subquery(image_subquery),
+        annotated_preview=Subquery(preview_subquery)
+    ).values(
+        'id',             # Внутренний ID Django (число)
+        'product_id',     # Строковый ID (например, UID из 1С)
+        'name', 
+        'unit', 
+        'article', 
+        'client_price',    # Наша аннотированная цена
+        'annotated_preview'
+    ).order_by('name')
     
-    # Формируем список словарей для JSON
-    data = [
-        {
-            "product_id": p.product_id,
-            "name": p.name,
-            "price": float(p.price), # Decimal нужно преобразовать в float или string
-        } 
-        for p in products
-    ]
+    paginator = Paginator(products, page_size)
+    
+    try:
+        # Получаем данные конкретной страницы
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        # Если page не число, отдаем первую страницу
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        # Если номер страницы слишком большой (вышли за пределы), отдаем последнюю
+        page_obj = paginator.page(paginator.num_pages)
      
-    return JsonResponse(data, safe=False)
+    # 5. Формируем структурированный ответ
+    response_data = {
+        'pagination': {
+            'current_page': page_obj.number,
+            'next_page': page_obj.next_page_number() if page_obj.has_next() else None,
+            'previous_page': page_obj.previous_page_number() if page_obj.has_previous() else None,
+            'total_pages': paginator.num_pages,
+            'total_items': paginator.count,
+            'page_size': page_size,
+        },
+        'results': list(page_obj.object_list) # Данные только для текущей страницы
+    }
+
+    return JsonResponse(response_data, safe=True, json_dumps_params={'ensure_ascii': False})
 
 
 @login_required 

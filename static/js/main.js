@@ -107,31 +107,40 @@ const updateInvoiceTotals = () => {
     document.querySelector('#total-amount').innerText = formatCurrency(subtotal);
 };
 
+
 // Функция загрузки и фильтрации товаров
 async function loadProducts(query = '') {
     const listContainer = document.getElementById('product-list-results');
     const clientId = document.getElementById('client-select').value;
+
     listContainer.innerHTML = '<div class="text-center p-3"><div class="spinner-border spinner-border-sm"></div></div>';
 
     try {
         // Замените URL на ваш эндпоинт, который отдает JSON товаров
         const response = await fetch(`/api/products/search/?client_id=${clientId}&q=${query}`);
-        const products = await response.json();
+        const data = await response.json();
 
         listContainer.innerHTML = '';
-        products.forEach(product => {
+        data.results.forEach(product => {
             const item = document.createElement('div');
             item.className = 'list-group-item d-flex justify-content-between align-items-center list-group-item-action';
             item.innerHTML = `
                 <div>
                     <div class="fw-bold">${product.name}</div>
-                    <small class="text-muted">Цена: ${product.price}₽</small>
+                    <small class="text-muted">Артикул: ${product.article}</small>
                 </div>
-                <button class="btn btn-sm btn-outline-primary select-product-btn" 
-                        data-id="${product.product_id}" 
-                        data-name="${product.name}" 
-                        data-price="${product.price}">
-                    Добавить
+                <div class="qty-control mx-auto">
+                    <button type="button" class="qty-btn">-</button>
+                        <input type="text" name="item_quantity" class="qty-input" value="1">
+                    <button type="button" class="qty-btn">+</button>
+                </div>
+                <button 
+                    class="icon-link nav-link select-product-btn"
+                    data-id="${product.product_id}" 
+                    data-name="${product.name}" 
+                    data-price="${product.client_price}">
+                        <i class="bi bi-cart4"></i>
+                        В заказ
                 </button>
             `;
             listContainer.appendChild(item);
@@ -167,7 +176,7 @@ document.addEventListener('input', function(e) {
         }
     }
     else if (e.target.id === 'product-search-input') {
-        loadProducts(e.target.value);
+        //loadProductsV1(e.target.value);
     };
 });
 
@@ -318,7 +327,8 @@ document.addEventListener('click', function(e) {
         pickerModal.show();
         loadProducts(); // Подгружаем список при открытии
         */
-
+    }else if (e.target.closest('#add-item-btn-offcanvas')) {
+        //SelectProductsHandler();  
     }
 
     // Подбор товара из модального окна
@@ -534,7 +544,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-
 document.addEventListener('input', function(e) {
 
     if (e.target && e.target.id === 'select-search') {
@@ -560,7 +569,6 @@ document.addEventListener('input', function(e) {
         }, 300); // задержка 300мс
     }
 });
-
 
 document.addEventListener('DOMContentLoaded', function () {
     
