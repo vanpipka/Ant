@@ -126,11 +126,12 @@
                                     {% for item in items %}
                                     <tr class="order-row">
                                         {% if order.status == 'draft' %} 
+                                        
                                             <td class="py-4">
-                                                <!--
+                                                
                                                 <small class="text-muted">{{item.name}}</small>
                                                 <input type="hidden" name="item_product_id" value="{{item.product_id}}">
-                                                -->
+                                                <!-- Ниже подбор из селект листа 
                                                 <div class="custom-select-container position-relative" style="">
 
                                                     <div 
@@ -153,6 +154,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                            -->
                                             </td>
                                             <td>                                                                          
                                                 <div class="qty-control mx-auto">
