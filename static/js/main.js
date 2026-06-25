@@ -344,6 +344,9 @@ document.addEventListener('click', function(e) {
         // значение количества
         const quantity = parseInt(qtyInput.value) || 1;
 
+        // возвращаем количество к исходной единичке
+        qtyInput.value = 1;
+
         const product = {
             id: btn.dataset.id,
             name: btn.dataset.name,
@@ -369,12 +372,12 @@ document.addEventListener('click', function(e) {
 
             const qtyInput = row.querySelector('input[name="item_quantity"]');
 
-            qtyInput.value = product.quantity;
+            qtyInput.value = (parseInt(qtyInput.value) || 0) + product.quantity;
 
             // пересчет суммы строки
             const amountCell = row.querySelector('.order-unit-amount');
 
-            const total = qtyInput.value * product.price;
+            const total = (parseInt(qtyInput.value) || 0) * product.price;
 
             amountCell.textContent = `${total.toFixed(2)}₽`;
 

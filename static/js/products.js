@@ -121,7 +121,7 @@ const ProductCatalog = {
 
         const mediaUrl = window.MEDIA_URL || '/media/';
 
-        const tbody = document.querySelector('#order-items-container');
+        //const tbody = document.querySelector('#order-items-container');
 
         products.forEach(product => {
 
@@ -129,18 +129,18 @@ const ProductCatalog = {
             // =========================
             // ИЩЕМ СУЩЕСТВУЮЩУЮ СТРОКУ
             // =========================
-            const existingInput = tbody.querySelector(
-                `input[name="item_product_id"][value="${product.product_id}"]`
-            );
+            //const existingInput = tbody.querySelector(
+            //    `input[name="item_product_id"][value="${product.product_id}"]`
+            //);
             
             // =====================================================
             // ЕСЛИ ТОВАР УЖЕ ЕСТЬ → БЕРЕМ КОЛИЧЕСТВО
             // =====================================================
-            if (existingInput) {
-                const row = existingInput.closest('.order-row');
-                const qtyInput = row.querySelector('input[name="item_quantity"]');
-                qty = qtyInput.value;
-            }
+            //if (existingInput) {
+            //    const row = existingInput.closest('.order-row');
+            //    const qtyInput = row.querySelector('input[name="item_quantity"]');
+            //    qty = qtyInput.value;
+            //}
             
             const imageBlock = product.annotated_preview 
                 ? `<img src="${mediaUrl}${product.annotated_preview}" 
