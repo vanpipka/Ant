@@ -121,8 +121,27 @@ const ProductCatalog = {
 
         const mediaUrl = window.MEDIA_URL || '/media/';
 
+        const tbody = document.querySelector('#order-items-container');
+
         products.forEach(product => {
 
+            let qty = 1;
+            // =========================
+            // ИЩЕМ СУЩЕСТВУЮЩУЮ СТРОКУ
+            // =========================
+            const existingInput = tbody.querySelector(
+                `input[name="item_product_id"][value="${product.product_id}"]`
+            );
+            
+            // =====================================================
+            // ЕСЛИ ТОВАР УЖЕ ЕСТЬ → БЕРЕМ КОЛИЧЕСТВО
+            // =====================================================
+            if (existingInput) {
+                const row = existingInput.closest('.order-row');
+                const qtyInput = row.querySelector('input[name="item_quantity"]');
+                qty = qtyInput.value;
+            }
+            
             const imageBlock = product.annotated_preview 
                 ? `<img src="${mediaUrl}${product.annotated_preview}" 
                         data-full-src="${mediaUrl}${product.annotated_image}"
@@ -135,30 +154,54 @@ const ProductCatalog = {
                    </div>`;
 
             const productHtml = `
-                <div class="list-group-item d-flex align-items-center justify-content-between p-2 border-bottom">
+            <tr>
+                <td class="py-4">
                     <div class="d-flex align-items-center">
-                        <div class="me-3 position-relative" style="width: 56px; height: 56px; flex-shrink: 0;">
+                        <div class="me-3 position-relative flex-shrink-0" style="width: 56px; height: 56px;">
                             ${imageBlock}
                         </div>
-                        
+
                         <div>
-                            <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.9rem;">${product.name}</h6>
-                            <small class="text-muted">Арт: ${product.article} | Ед: ${product.unit}</small>
+                            <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.9rem;">
+                                ${product.name}
+                            </h6>
+                            <small class="text-muted">
+                                Арт: ${product.article} | Ед: ${product.unit}
+                            </small>
                         </div>
                     </div>
-                    <div class="text-end">
-                        <span class="text-success fw-bold d-block">${product.client_price} ₽</span>
-                        <button 
-                            class="icon-link  btn-new-invoice select-product-btn"
-                            data-id="${product.product_id}" 
-                            data-name="${product.name}" 
-                            data-price="${product.client_price}">
-                                <i class="bi bi-cart4"></i>
-                                В заказ
-                        </button>
+                </td>
+                <td>
+                    <div class="qty-control mx-auto">
+                        <button type="button" class="qty-btn">-</button>
+                        <input type="text" name="item_quantity" class="qty-input" value="${qty}">
+                        <button type="button" class="qty-btn">+</button>
                     </div>
-                </div>
+                </td>
+                        
+                <!-- Цена -->
+                <td class="text-end fw-bold text-muted ">
+                    <div class="order-unit-price">
+                        ${product.client_price} ₽
+                    </div>
+                    <input type="hidden" name="item_price" value="{{item.price}}">
+                </td>
+                          
+                <!--<td class="text-end fw-bold order-unit-amount">₽</td>  -->                                       
+                <td class="text-end">
+                    <button
+                        class="icon-link btn-new-invoice select-product-btn"
+                        data-id="${product.product_id}"
+                        data-name="${product.name}"
+                        data-price="${product.client_price}"
+                    >
+                    <i class="bi bi-cart4 me-1"></i>
+                        В заказ
+                    </button>
+                </td>
+            </tr>
             `;
+
             this.el.container.insertAdjacentHTML('beforeend', productHtml);
         });
     }

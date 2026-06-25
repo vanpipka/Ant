@@ -334,44 +334,94 @@ document.addEventListener('click', function(e) {
     // Подбор товара из модального окна
     const btn = e.target.closest('.select-product-btn');
     if (btn) {
+        
+        // получаем текущую строку
+        const row = btn.closest('tr');
+
+        // получаем input количества
+        const qtyInput = row.querySelector('input[name="item_quantity"]');
+
+        // значение количества
+        const quantity = parseInt(qtyInput.value) || 1;
+
         const product = {
             id: btn.dataset.id,
             name: btn.dataset.name,
-            price: btn.dataset.price
+            price: parseFloat(btn.dataset.price),
+            quantity: quantity
         };
 
         const tbody = document.querySelector('#order-items-container');
+
+        // =========================
+        // ИЩЕМ СУЩЕСТВУЮЩУЮ СТРОКУ
+        // =========================
+        const existingInput = tbody.querySelector(
+            `input[name="item_product_id"][value="${product.id}"]`
+        );
+
+        // =====================================================
+        // ЕСЛИ ТОВАР УЖЕ ЕСТЬ → УВЕЛИЧИВАЕМ КОЛИЧЕСТВО
+        // =====================================================
+        if (existingInput) {
+
+            const row = existingInput.closest('.order-row');
+
+            const qtyInput = row.querySelector('input[name="item_quantity"]');
+
+            qtyInput.value = product.quantity;
+
+            // пересчет суммы строки
+            const amountCell = row.querySelector('.order-unit-amount');
+
+            const total = qtyInput.value * product.price;
+
+            amountCell.textContent = `${total.toFixed(2)}₽`;
+
+            updateInvoiceTotals();
+
+            return;
+        }
+
+        // =====================================================
+        // ЕСЛИ НЕТ → СОЗДАЕМ НОВУЮ СТРОКУ
+        // =====================================================
         const newRow = document.createElement('tr');
+
         newRow.className = 'order-row';
-        
+
         newRow.innerHTML = `
-                        <td class="py-4">
-                            <div class="fw-bold"></div>
-                            <small class="text-muted">${product.name}</small>
-                            <input type="hidden" name="item_product_id" value="${product.id}">
-                        </td>
-                        <td>
-                            <div class="qty-control mx-auto">
-                                <button type="button" class="qty-btn">-</button>
-                                <input type="text" name="item_quantity" class="qty-input" value="1">
-                                <button type="button" class="qty-btn">+</button>
-                            </div>
-                        </td>
-                        <td class="text-end fw-bold text-muted order-unit-price">
-                            ${product.price}₽
-                            <input type="hidden" name="item_price" value="${product.price}">    
-                        </td>
-                        <td class="text-end fw-bold order-unit-amount">${product.price}₽</td>
-                        <td class="text-end">
-                            <i class="bi bi-trash trash-btn"></i>
-                        </td>
+            <td class="py-4">
+                <div class="fw-bold"></div>
+                <small class="text-muted">${product.name}</small>
+                <input type="hidden" name="item_product_id" value="${product.id}">
+            </td>
+
+            <td>
+                <div class="qty-control mx-auto">
+                    <button type="button" class="qty-btn">-</button>
+                    <input type="text" name="item_quantity" class="qty-input" value="${product.quantity}">
+                    <button type="button" class="qty-btn">+</button>
+                </div>
+            </td>
+
+            <td class="text-end fw-bold text-muted order-unit-price">
+                ${product.price.toFixed(2)}₽
+                <input type="hidden" name="item_price" value="${product.price}">
+            </td>
+
+            <td class="text-end fw-bold order-unit-amount">
+                ${product.price.toFixed(2)}₽
+            </td>
+
+            <td class="text-end">
+                <i class="bi bi-trash trash-btn"></i>
+            </td>
         `;
 
         tbody.appendChild(newRow);
-        updateInvoiceTotals(); // Ваш пересчет итогов
-        
-        // Закрываем модалку выбора после добавления (по желанию)
-        // bootstrap.Modal.getInstance(document.getElementById('productPickerModal')).hide();
+
+        updateInvoiceTotals();
     }
 });
 

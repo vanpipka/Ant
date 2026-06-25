@@ -109,10 +109,11 @@ def order_modal_handler(request, pk=None):
         for i in order.items.all():
             
             try:
-                product = Product.objects.get(client_id=order.client_id, product_id=i.product_id)  
-                i.price = product.price
-                i.total = i.price * i.quantity           
-                order.mock_items.append(i)
+                product = ClientPrice.objects.filter(client_id=order.client_id, product__product_id=i.product_id).first()
+                if product:  
+                    i.price = product.price
+                    i.total = i.price * i.quantity           
+                    order.mock_items.append(i)
             except Product.DoesNotExist:
                 continue  # Если товар не найден, пропускаем эту позицию                
        

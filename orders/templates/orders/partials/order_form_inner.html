@@ -261,7 +261,7 @@
 
 {% if order.status == 'draft' %}
 
-<div style="min-width: 50%" class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+<div class="offcanvas offcanvas-end w-auto" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasRightLabel">Подбор номенклатуры</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -272,9 +272,23 @@
             <span class="input-group-text"><i class="bi bi-search"></i></span>
             <input type="text" id="product-search-input" class="form-control" placeholder="Поиск по наименованию...">
         </div>
-        
-        <div class="list-group flex-grow-1" id="product-list-results" style="overflow-y: auto;">
-            </div>
+
+        <div class="">
+                            <table class="table align-middle">
+                                <thead class="bg-light">
+                                    <tr class="text-uppercase text-muted small fw-bold">
+                                        <th class="border-0 py-3">Товар</th>
+                                        <th class="border-0 py-3 text-center">Количество</th>
+                                        <th class="border-0 py-3 text-end">Цена</th>
+                                        <!--<th class="border-0 py-3 text-end">Сумма</th>-->
+                                        <th class="text-end">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="product-list-results" style="overflow-y: auto;">
+                                </tbody>
+                            </table>
+                            
+        </div>
 
         <div id="pagination-loader" class="text-center py-2 text-muted" style="font-size: 0.9rem; display: none;">
             <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Загрузка товаров...
