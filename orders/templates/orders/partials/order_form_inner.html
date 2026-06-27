@@ -32,11 +32,18 @@
                         </div>
                         <div class="stats-card">
                             <h4 class="mb-0 fw-bold me-2" style="width:100%">
-                                <select id="paymenttype-select" name="paymenttype_id" class="form-select bg-light border-0" style="border-radius: 12px;">
-                                    <option disabled {% if not order.client_id %} selected {% endif %}>Тип оплаты</option>
-                                    <option value=0 selected>Безнал</option>
-                                    <option value=1>Наличные</option>
-                                </select>    
+                                {% if order.status == 'draft' %}
+                                    <select form="order-main-form" id="paymenttype-select" name="paymenttype_id" class="form-select bg-light border-0" style="border-radius: 12px;">
+                                        <option disabled>Тип оплаты</option>
+                                        <option value=0 {% if order.payment_type == 0 %} selected {% endif %}>Безнал</option>
+                                        <option value=1 {% if order.payment_type == 1 %} selected {% endif %}>Наличные</option>
+                                    </select> 
+                                {% else %}   
+                                    <div form="order-main-form" class="form-select bg-light border-0" style="border-radius: 12px;">
+                                        {% if order.payment_type == 0 %}Безнал{% endif %}
+                                        {% if order.payment_type == 1 %}Наличные{% endif %}
+                                    </div> 
+                                {% endif %}
                             </h4>
                             <div class="stats-icon" style="background: #f0fdf4; color: #16a34a;"><i class="bi bi-cash"></i></div>
                         </div>
@@ -55,7 +62,7 @@
                 
                     <form method="post" name="order-main-form" id="order-main-form" action="/orders/save/">
                         <input type="hidden" name="status" id="final-status" value="draft">
-                        <input type="hidden" name="order_id" value="{% if order.id %}{{order.id}}{% endif %}">
+                        <input type="hidden" name="order_id" id="current_order_id" value="{% if order.id %}{{order.id}}{% endif %}">
                         {% csrf_token %}
                         <div class="row g-4">
                             <div class="col-md-6">

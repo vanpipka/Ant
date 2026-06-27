@@ -1,5 +1,61 @@
 const CACHE_ITEMS_KEY = 'last_selected_items';
 
+async function submitFormInBackground() {
+   
+    const finalStatusInput = document.getElementById('final-status');
+    finalStatusInput.value = 'draft';
+    await submitForm(null, true);
+
+}
+
+async function submitForm(confirmModal, its_backround_submit = false) {
+
+    const mainForm = document.getElementById('order-main-form');
+    if (!mainForm) return;
+
+    if (!mainForm.reportValidity()) {
+        return;
+    }
+
+    if (confirmModal) {
+        confirmModal.hide();
+    }
+
+    if (its_backround_submit){
+        const formData = new FormData(mainForm);
+
+        formData.append("its_backround_submit", true);
+
+        fetch(mainForm.action, {
+            method: mainForm.method || 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Save failed');
+            return res.json();
+        })
+        .then(data => {
+        
+            const current_order_id_element = document.getElementById('current_order_id');
+            if (current_order_id_element){
+                current_order_id_element.value = data.order_id;
+            }
+            
+        })
+        .catch(err => {
+            console.error(err);
+        });
+
+
+    }
+    else {
+        mainForm.submit()
+    }
+}
+
 // Функция для кастомного селекта подбора номенклатуры
 // 1. Инициализация при открытии - показываем последние 5 из кэша
 function renderInitialList(container) {
@@ -65,15 +121,15 @@ function selectItem(item, container) {
 
 // Функция для очистки строки от символов валюты и превращения в число
 const parseCurrency = (text) => {
-        return parseFloat(text.replace(/[^0-9.-]+/g, "")) || 0;
+    return parseFloat(text.replace(/[^0-9.-]+/g, "")) || 0;
 };
 
 // Функция форматирования числа обратно в валюту
 const formatCurrency = (value) => {
-        return value.toLocaleString('ru-RU', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }) + '₽'; // Добавляем символ рубля для отображения
+    return value.toLocaleString('ru-RU', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }) + '₽'; // Добавляем символ рубля для отображения
 };
 
 // Главная функция пересчета всего инвойса
@@ -266,6 +322,9 @@ document.addEventListener('click', function(e) {
         // Вызываем событие 'change' вручную, чтобы другие скрипты 
         // (например, пересчет суммы) узнали об изменении
         input.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // Сохраним ордер
+        submitFormInBackground() 
     }
 
     // Проверим нажата ли кнопка подбора товаров (может быть иконка, может быть кнопка с id)
@@ -327,6 +386,8 @@ document.addEventListener('click', function(e) {
         pickerModal.show();
         loadProducts(); // Подгружаем список при открытии
         */
+        // Сохраним ордер
+        submitFormInBackground() 
     }else if (e.target.closest('#add-item-btn-offcanvas')) {
         //SelectProductsHandler();  
     }
@@ -383,6 +444,9 @@ document.addEventListener('click', function(e) {
 
             updateInvoiceTotals();
 
+            // Сохраним ордер
+            submitFormInBackground();
+
             return;
         }
 
@@ -425,6 +489,10 @@ document.addEventListener('click', function(e) {
         tbody.appendChild(newRow);
 
         updateInvoiceTotals();
+
+        // Сохраним ордер
+        submitFormInBackground();
+            
     }
 });
 
@@ -495,10 +563,10 @@ document.addEventListener('submit', function(event) {
         const addressSelect = document.getElementById('address-select');
         const selectSelect = document.getElementById('client-select');
         const paymenttypeSelect = document.getElementById('paymenttype-select');
-        
+
         let showAlert = false;
 
-        // console.log(selectSelect.value, addressSelect.value);
+        console.log("сохраняем");
 
         if (!paymenttypeSelect || !paymenttypeSelect.value) {
             event.preventDefault(); // Останавливаем отправку
@@ -548,34 +616,16 @@ document.addEventListener('submit', function(event) {
         document.getElementById('save-as-draft').addEventListener('click', function() {
             const finalStatusInput = document.getElementById('final-status');
             finalStatusInput.value = 'draft';
-            submitForm();
+            submitForm(confirmModal);
         });
 
         // 3. Обработка кнопки "В обработку"
         document.getElementById('save-as-confirmed').addEventListener('click', function() {
             const finalStatusInput = document.getElementById('final-status');
-            finalStatusInput.value = 'sent'; // Или 'sent' в зависимости от вашего TextChoices
-            submitForm();
+            finalStatusInput.value = 'sent'; 
+            submitForm(confirmModal);
         });
 
-        function submitForm() {
-
-           console.log('Подтверждено, отправляем форму с статусом:', document.getElementById('final-status').value);
-
-            const mainForm = document.getElementById('order-main-form');
-            if (!mainForm) return;
-
-            confirmModal.hide();
-            // Отправляем форму заново, но передаем флаг подтверждения в detail
-            const event = new CustomEvent('submit', {
-                cancelable: true,
-                detail: { confirmed: true }
-            });
-            mainForm.dispatchEvent(event);
-            if (mainForm.reportValidity()) {
-                mainForm.submit();
-            }
-        }
     }
 });
 

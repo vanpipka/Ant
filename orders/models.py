@@ -16,6 +16,10 @@ class Order(models.Model):
         REJECTED = "rejected", "Отклонен"
         DONE = "done", "Выполнен"
 
+    class PaymentType(models.IntegerChoices):     
+        TRANSFER = 0, "Банковский перевод"
+        CASH = 1, "Наличные"
+        
     external_id = models.CharField(max_length=64, null=True, blank=True)  # ID из 1С
     number = models.CharField(max_length=15, null=True, blank=True, default="")  # number из 1С
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, null=True, blank=True)
@@ -23,6 +27,7 @@ class Order(models.Model):
     address = models.CharField(max_length=255, default="")
     date = models.DateTimeField(default=timezone.now, null=True, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
+    payment_type = models.IntegerField(choices=PaymentType.choices, default=PaymentType.TRANSFER)
     description = models.TextField(blank=True, default="")
 
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)

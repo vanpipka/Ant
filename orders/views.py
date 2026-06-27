@@ -325,6 +325,8 @@ def save_order(request):
         description = request.POST.get('order_description', '')
         address = request.POST.get('address_id', '') # Если это ID адреса
         status = request.POST.get('status', 'draft') 
+        payment_type = request.POST.get('paymenttype_id', 0) 
+        its_backround_submit = request.POST.get('its_backround_submit', False) 
         
         if not address:
             address = request.POST.get('address', '')
@@ -336,7 +338,8 @@ def save_order(request):
                 client_id = client_id,
                 description = description,
                 address = address, # Или текстовое поле
-                status = status
+                status = status,
+                payment_type = payment_type
             )
         else:
             # Обновляем существующий заказ
@@ -345,6 +348,7 @@ def save_order(request):
             order.address = address
             order.description = description
             order.status = status
+            order.payment_type = payment_type
             order.items.all().delete() # Удаляем старые позиции, чтобы записать новые
             
 
@@ -380,7 +384,10 @@ def save_order(request):
         order.total_amount = total_amount
         order.save()
         
-        return redirect('/') # Или другой URL
+        if (its_backround_submit):
+            return JsonResponse({"order_id": order.id})
+        else:
+            return redirect('/') # Или другой URL
     
 
 @login_required     
