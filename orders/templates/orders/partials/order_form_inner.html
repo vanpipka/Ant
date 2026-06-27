@@ -14,33 +14,37 @@
       </div>
       <div class="modal-body">
 
-            <div class="container py-4">
+            <div class="container">
                 <!-- Top Stats -->
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
+                        <div>
+                            <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Сумма</small>
+                        </div>
                         <div class="stats-card">
-                            <div>
-                                <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Сумма</small>
-                                <h4 class="mb-0 fw-bold" id="total-amount">{{order.total_amount}}</h4>
-                            </div>
+                            <h4 class="mb-0 fw-bold" id="total-amount">{{order.total_amount}}</h4>
                             <div class="stats-icon" style="background: #e6f7f4; color: #14a49a;"><i class="bi bi-wallet2"></i></div>
                         </div>
                     </div>
                     <div class="col-md-4">
+                        <div>
+                            <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Оплата</small>
+                        </div>
                         <div class="stats-card">
-                            <div>
-                                <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Оплата</small>
-                                <h4 class="mb-0 fw-bold">--</h4>
-                            </div>
-                            <div class="stats-icon" style="background: #f0fdf4; color: #16a34a;"><i class="bi bi-check-circle"></i></div>
+                            <h4 class="mb-0 fw-bold me-2" style="width:100%">
+                                <select id="paymenttype-select" name="paymenttype_id" class="form-select bg-light border-0" style="border-radius: 12px;">
+                                    <option disabled {% if not order.client_id %} selected {% endif %}>Тип оплаты</option>
+                                    <option value=0 selected>Безнал</option>
+                                    <option value=1>Наличные</option>
+                                </select>    
+                            </h4>
+                            <div class="stats-icon" style="background: #f0fdf4; color: #16a34a;"><i class="bi bi-cash"></i></div>
                         </div>
                     </div>
                     <div class="col-md-4">
+                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Статус</small>
                         <div class="stats-card">
-                            <div>
-                                <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Статус</small>
-                                <h4 class="mb-0 fw-bold">{{order.get_status_display}}</h4>
-                            </div>
+                            <h4 class="mb-0 fw-bold">{{order.get_status_display}}</h4>
                             <div class="stats-icon" style="background: #fef2f2; color: #ef4444;"><i class="bi bi-shield-check"></i></div>
                         </div>
                     </div>
@@ -78,14 +82,14 @@
                                     {% if addresses %}
                                         <select id="address-select" name="address_id" class="form-select py-3 bg-light border-0" required>  
                                         
-                                            {% if not order.address in addresses %}
-                                                <option value="{{ order.address }}">{{ order.address }}</option>
+                                            {% if order.address and not order.address in addresses %}
+                                                <option value="{{ order.address }}" selected>{{ order.address }}</option>
                                             {% endif %}
-                                            {% for i in addresses  %}
-                                                {% if i.address_line == order.address %}
+                                            {% for address in addresses  %}
+                                                {% if address == order.address %}
                                                     <option value="{{ order.address }}" selected>{{ order.address }}</option>
                                                 {% else %}
-                                                    <option value="{{ i.address_line }}">{{ i.address_line }}</option>
+                                                    <option value="{{ address }}">{{ address }}</option>
                                                 {% endif %}
                                             {% endfor %}
                                                 
@@ -260,45 +264,7 @@
 
 
 {% if order.status == 'draft' %}
-
-<div class="offcanvas offcanvas-end w-auto" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasRightLabel">Подбор номенклатуры</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body d-flex flex-column" style="height: 100%;">
-        
-        <div class="input-group mb-3">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input type="text" id="product-search-input" class="form-control" placeholder="Поиск по наименованию...">
-        </div>
-
-        <div class="">
-                            <table class="table align-middle">
-                                <thead class="bg-light">
-                                    <tr class="text-uppercase text-muted small fw-bold">
-                                        <th class="border-0 py-3">Товар</th>
-                                        <th class="border-0 py-3 text-center">Количество</th>
-                                        <th class="border-0 py-3 text-end">Цена</th>
-                                        <!--<th class="border-0 py-3 text-end">Сумма</th>-->
-                                        <th class="text-end">&nbsp;</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="product-list-results" style="overflow-y: auto;">
-                                </tbody>
-                            </table>
-                            
-        </div>
-
-        <div id="pagination-loader" class="text-center py-2 text-muted" style="font-size: 0.9rem; display: none;">
-            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Загрузка товаров...
-        </div>
-        <div id="pagination-end" class="text-center py-2 text-muted" style="font-size: 0.9rem; display: none;">
-            Все доступные товары загружены
-        </div>
-
-    </div>
-</div>
+    {% include "orders/partials/item_list_modal.html" %}
 
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">

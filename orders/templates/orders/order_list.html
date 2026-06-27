@@ -6,18 +6,20 @@
 <div class="main-container">
         <!-- Toolbar -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <button data-url="{% url 'order_modal_create' %}" class="btn btn-sm btn-new-invoice open-order-modal">
-                <i class="bi bi-plus"></i> Заказ
-            </button>
+            <div class="col col-sm-6">
+                <button data-url="{% url 'order_modal_create' %}" class="btn btn-sm btn-new-invoice open-order-modal">
+                    <i class="bi bi-plus"></i> Заказ
+                </button>
+            </div>
             
-            <div >
+            <div class="col col-sm-6">
                 <form method="GET" id="filter-form" class="d-flex gap-2">
-                    <div class="search-container">
+                    <div class="search-container  w-75">
                         <i class="bi bi-search"></i>
                         <input type="text" id="search-input" name="q" value="{{ search_query }}" class="form-control search-input" placeholder="Поиск...">
                     </div>
 
-                    <select class="form-select status-select" id="status-select" name="status">
+                    <select class="form-select status-select w-50" id="status-select" name="status">
                         <option value="">Все статусы</option>
                         {% for value, label in order_statuses %}
                             <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>

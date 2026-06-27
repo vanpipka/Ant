@@ -494,10 +494,17 @@ document.addEventListener('submit', function(event) {
     if (event.target && event.target.id === 'order-main-form') {
         const addressSelect = document.getElementById('address-select');
         const selectSelect = document.getElementById('client-select');
+        const paymenttypeSelect = document.getElementById('paymenttype-select');
         
         let showAlert = false;
 
         // console.log(selectSelect.value, addressSelect.value);
+
+        if (!paymenttypeSelect || !paymenttypeSelect.value) {
+            event.preventDefault(); // Останавливаем отправку
+            paymenttypeSelect.classList.add('is-invalid');
+            showAlert = true;
+        }
 
         if (!selectSelect || !selectSelect.value || selectSelect.value === 'Выберите получателя') {
             event.preventDefault(); // Останавливаем отправку

@@ -102,6 +102,13 @@ def order_modal_handler(request, pk=None):
         # Режим создания
         order = Order(user=request.user)
         order.mock_items = []  # Временное поле для хранения позиций в памяти (не сохраняется в БД) 
+       
+       
+    # Если у юзера только один клиент, сразу его установим    
+    clients = request.user.clients.all()
+    
+    if clients.count() == 1:
+        order.client = clients[0]
 
     if request.GET.get('copy') == 'true' and pk:
         # Режим копирования
@@ -130,8 +137,14 @@ def order_modal_handler(request, pk=None):
         'is_edit': pk is not None,
     }
     
-    if order.client_id:
-        context['addresses'] = ClientAddress.objects.filter(client=order.client)
+    # если клиент установлен, то сразу проверим адрес
+    try:    
+        if order.client:
+            context['addresses'] = [i.address_line for i in ClientAddress.objects.filter(client=order.client)]         
+            if len(context['addresses']) == 1:
+                order.address = context['addresses'][0] 
+    except:
+        ...
     
     # Возвращаем только внутреннюю часть формы
     return render(request, 'orders/partials/order_form_inner.html', context)

@@ -1,0 +1,39 @@
+
+<div class="offcanvas offcanvas-end w-auto" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasRightLabel">Подбор номенклатуры</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column" style="height: 100%;">
+        
+        <div class="input-group mb-3">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" id="product-search-input" class="form-control" placeholder="Поиск по наименованию...">
+        </div>
+
+        <div class="">
+                            <table class="table align-middle">
+                                <thead class="bg-light">
+                                    <tr class="text-uppercase text-muted small fw-bold">
+                                        <th class="border-0 py-3">Товар</th>
+                                        <th class="border-0 py-3 text-center">Количество</th>
+                                        <th class="border-0 py-3 text-end">Цена</th>
+                                        <!--<th class="border-0 py-3 text-end">Сумма</th>-->
+                                        <th class="text-end">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="product-list-results" style="overflow-y: auto;">
+                                </tbody>
+                            </table>
+                            
+        </div>
+
+        <div id="pagination-loader" class="text-center py-2 text-muted" style="font-size: 0.9rem; display: none;">
+            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Загрузка товаров...
+        </div>
+        <div id="pagination-end" class="text-center py-2 text-muted" style="font-size: 0.9rem; display: none;">
+            Все доступные товары загружены
+        </div>
+
+    </div>
+</div>
