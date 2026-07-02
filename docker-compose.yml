@@ -2,6 +2,7 @@ services:
   django:
     build: .
     container_name: ant_app
+    restart: unless-stopped
 
     command: >
       sh -c "
