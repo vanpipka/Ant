@@ -30,6 +30,7 @@ Thumbs.db
 media/
 staticfiles/
 config/static/
+volumes/
 
 # Logs
 config/logs/
