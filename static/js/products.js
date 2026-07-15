@@ -19,10 +19,16 @@ const ProductCatalog = {
 
     // Инициализация модуля
     init() {
+
+        console.log('ProductCatalog initialized');
+
         this.el.search = document.getElementById('product-search-input');
+        this.el.scrollContainer = document.getElementById('product-list-scroll-container');
         this.el.container = document.getElementById('product-list-results');
         this.el.loader = document.getElementById('pagination-loader');
         this.el.endMessage = document.getElementById('pagination-end');
+
+        //console.log('Elements:', this.el);
 
         this.bindEvents();
     },
@@ -41,8 +47,11 @@ const ProductCatalog = {
         });
 
         // Скролл списка
-        this.el.container.addEventListener('scroll', () => {
-            const triggerPoint = this.el.container.scrollHeight - this.el.container.scrollTop - this.el.container.clientHeight;
+        this.el.scrollContainer.addEventListener('scroll', () => {
+
+            console.log('Scroll position:');    
+
+            const triggerPoint = this.el.scrollContainer.scrollHeight - this.el.scrollContainer.scrollTop - this.el.scrollContainer.clientHeight;
             if (triggerPoint < 20 && !this.state.isLoading && this.state.hasNextPage) {
                 this.loadProducts(false); // Подгрузка следующей страницы
             }
