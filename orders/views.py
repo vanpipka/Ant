@@ -272,7 +272,7 @@ def set_order_full(request):
 
             # 3. Создаем или обновляем шапку заказа, заказ уже в системе
             order, created = Order.objects.update(
-                order_id=order_id,
+                id=order_id,
                 defaults={
                     #'user': user,
                     'external_id': order_ext_id,
