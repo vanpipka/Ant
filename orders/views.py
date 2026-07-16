@@ -248,13 +248,17 @@ def set_order_full(request):
         
         # 1. Извлекаем основные данные заказа
         order_ext_id = data.get('external_id')
-        user_ext_id = data.get('user_external_id')
+        #user_ext_id = data.get('user_external_id')
         client_ext_id = data.get('client_external_id')
         date = data.get('date')  # Если нужно, можно парсить дату из строки
         
         if not all([order_ext_id, client_ext_id]):
             return JsonResponse({'success': False, 'error': 'Отсутствует external_id заказа или клиента'}, status=400)
 
+        order = Order.objects.filter(id=order_ext_id).first()
+        if not order:
+            return JsonResponse({'success': False, 'error': f'Заказ № {order_ext_id} не найден'}, status=404)
+        
         with transaction.atomic():
             # 2. Ищем пользователя и клиента (обязательные связи)
             try:
@@ -263,13 +267,13 @@ def set_order_full(request):
                 return JsonResponse({'success': False, 'error': f'Клиент {client_ext_id} не найден'}, status=404)
             
             # Пользователь может быть не указан (например, прямой заказ в 1С)
-            user = User.objects.filter(external_id=user_ext_id).first() if user_ext_id else None
+            # user = User.objects.filter(external_id=user_ext_id).first() if user_ext_id else None
 
-            # 3. Создаем или обновляем шапку заказа
-            order, created = Order.objects.update_or_create(
+            # 3. Создаем или обновляем шапку заказа, заказ уже в системе
+            order, created = Order.objects.update(
                 external_id=order_ext_id,
                 defaults={
-                    'user': user,
+                    #'user': user,
                     'date': date,
                     'client': client,
                     'number': data.get('number', ''),
@@ -332,6 +336,7 @@ def save_order(request):
             address = request.POST.get('address', '')
         
         if not order_id:     
+            
             # Создаем заказ
             order = Order.objects.create(
                 user = request.user,

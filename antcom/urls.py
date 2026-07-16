@@ -23,10 +23,10 @@ urlpatterns = [
     path('api/users/update/', accounts_views.update_user_api, name='user_update_api'),
     path('api/orders/addresses/', order_views.get_addresses, name='api_get_addresses'),
     path('api/orders/update/', order_views.set_order_full, name='order_update_api'),
+    path('api/orders/export/', order_views.export_orders_to_1c, name='export_1c'),
     path('api/products/price/<str:client_id>', order_views.set_client_prices, name='set_client_prices'),
     path('api/products/update/<str:product_id>', order_views.save_product, name='save_product'),
     path('api/products/search/', order_views.product_search_api, name='product_search_api'),
-    path('api/products/export/', order_views.export_orders_to_1c, name='export_1c'),
     path('api/products/set_external_id/', order_views.set_external_id, name='set_external_id'),
     path('api/products/upload-image/', order_views.upload_product_image, name='upload_product_image'),
     

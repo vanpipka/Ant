@@ -51,6 +51,7 @@ class OrderService:
     def get_orders_for_user(user, status=None, search_query=None):
         # return get_mock_orders(user, status, search_query)
         query = Order.objects.filter(client__in=user.clients.all())
+        query = query.filter(user=user)
         if status:
             query = query.filter(status=status)
         if search_query:
