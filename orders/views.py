@@ -271,7 +271,7 @@ def set_order_full(request):
             # user = User.objects.filter(external_id=user_ext_id).first() if user_ext_id else None
 
             # 3. Создаем или обновляем шапку заказа, заказ уже в системе
-            order, created = Order.objects.update(
+            order, created = Order.objects.update_or_create(
                 id=order_id,
                 defaults={
                     #'user': user,
