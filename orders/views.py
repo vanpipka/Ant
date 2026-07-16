@@ -248,6 +248,7 @@ def set_order_full(request):
         
         # 1. Извлекаем основные данные заказа
         order_ext_id = data.get('external_id')
+        order_id = data.get('order_id')
         #user_ext_id = data.get('user_external_id')
         client_ext_id = data.get('client_external_id')
         date = data.get('date')  # Если нужно, можно парсить дату из строки
@@ -255,9 +256,9 @@ def set_order_full(request):
         if not all([order_ext_id, client_ext_id]):
             return JsonResponse({'success': False, 'error': 'Отсутствует external_id заказа или клиента'}, status=400)
 
-        order = Order.objects.filter(id=order_ext_id).first()
+        order = Order.objects.filter(id=order_id).first()
         if not order:
-            return JsonResponse({'success': False, 'error': f'Заказ № {order_ext_id} не найден'}, status=404)
+            return JsonResponse({'success': False, 'error': f'Заказ № {order_id} не найден'}, status=404)
         
         with transaction.atomic():
             # 2. Ищем пользователя и клиента (обязательные связи)
@@ -271,9 +272,10 @@ def set_order_full(request):
 
             # 3. Создаем или обновляем шапку заказа, заказ уже в системе
             order, created = Order.objects.update(
-                external_id=order_ext_id,
+                order_id=order_id,
                 defaults={
                     #'user': user,
+                    'external_id': order_ext_id,
                     'date': date,
                     'client': client,
                     'number': data.get('number', ''),
