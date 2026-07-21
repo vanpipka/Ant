@@ -7,7 +7,7 @@ from django.shortcuts import redirect, render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.files.base import ContentFile
 from django.http import HttpResponseNotFound, JsonResponse
-from django.db.models import F, OuterRef, Subquery
+from django.db.models import F, OuterRef, Subquery, Q
 from django.db import transaction
 from decimal import Decimal
 
@@ -184,7 +184,10 @@ def product_search_api(request):
     
     if query:
     # Ищем по имени или по артикулу (product_id)
-        products = products.filter(search_name__icontains=query)
+        products = products.filter(
+            Q(search_name__icontains=query) |
+            Q(article__icontains=query)
+        )
         
     #image_subquery = ProductImage.objects.filter(
     #        product_id=OuterRef('product_id')
