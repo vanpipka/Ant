@@ -430,59 +430,67 @@ def save_product(request, product_id):
     })
     
 
-@login_required     
+@login_required
 @require_POST
 def set_client_prices(request, client_id):
-    
-    if (not request.user.is_staff):
-        return JsonResponse({'success': False, 'error': 'Доступ запрещен'}, status=403)
-    
+
+    if not request.user.is_staff:
+        return JsonResponse(
+            {'success': False, 'error': 'Доступ запрещен'},
+            status=403
+        )
+
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'error': 'Ошибка формата JSON'}, status=400)
+        return JsonResponse(
+            {'success': False, 'error': 'Ошибка формата JSON'},
+            status=400
+        )
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
-              
-    items = data.get('items', [])
+        return JsonResponse(
+            {'success': False, 'error': str(e)},
+            status=500
+        )
 
-    # Находим клиента
+    items = data.get("items", [])
+
     try:
         client = Client.objects.get(external_id=client_id)
     except Client.DoesNotExist:
-        return JsonResponse({'success': False, 'error': f'Клиент {client_id} не найден'}, status=404)
+        return JsonResponse(
+            {
+                'success': False,
+                'error': f'Клиент {client_id} не найден'
+            },
+            status=404
+        )
 
     with transaction.atomic():
-        # 1. Собираем список product_id, которые прислала 1С
-        incoming_product_ids = [str(item.get('product_id')) for item in items if item.get('product_id')]
 
-        # 2. Удаляем те товары клиента, которых нет в пришедшем списке
-        # Это и есть механизм очистки лишних строк
-        ClientPrice.objects.filter(client=client).exclude(product__product_id__in=incoming_product_ids).delete()
+        for item in items:
 
-        # 3. Обновляем существующие или создаем новые товары
-        for item_data in items:
-            p_id = item_data.get('product_id')
-            if not p_id:
+            product_id = item.get("product_id")
+
+            if not product_id:
                 continue
-            
+
             try:
-                product = Product.objects.get(product_id=p_id)
+                product = Product.objects.get(product_id=product_id)
             except Product.DoesNotExist:
                 continue
-                
-            # update_or_create вызовет наш метод save() и обновит search_name автоматически
-            ClientPrice.objects.update_or_create(
+
+            obj, created = ClientPrice.objects.update_or_create(
                 client=client,
                 product=product,
                 defaults={
-                    'price': Decimal(str(item_data.get('price', 0))),
+                    "price": Decimal(str(item.get("price", 0)))
                 }
             )
 
     return JsonResponse({
         'success': True, 
-        'message': f'Синхронизация завершена. Обработано товаров: {len(incoming_product_ids)}'
+        'message': f'Синхронизация завершена.'
     })
  
     
