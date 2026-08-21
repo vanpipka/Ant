@@ -89,6 +89,18 @@ class ProductListView(LoginRequiredMixin, ListView):
 
         return queryset
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if context['is_paginated']:
+            page_obj = context['page_obj']
+
+            context['page_range'] = page_obj.paginator.get_elided_page_range(
+                number=page_obj.number
+            )
+
+        return context
+    
     
 @login_required 
 def order_modal_handler(request, pk=None):

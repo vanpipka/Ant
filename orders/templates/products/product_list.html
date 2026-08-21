@@ -64,11 +64,9 @@
     </table>
 
     {% if is_paginated %}
-        <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center mt-4">
-            <div class="text-muted small">
-                
-            </div>
+        <nav aria-label="Page navigation" class="d-flex justify-content-end">
             <ul class="pagination mb-0">
+
                 {% if page_obj.has_previous %}
                     <li class="page-item">
                         <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
@@ -77,10 +75,16 @@
                     </li>
                 {% endif %}
 
-                {% for num in page_obj.paginator.page_range %}
-                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                    </li>
+                {% for num in page_range %}
+                    {% if num == page_obj.paginator.ELLIPSIS %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
                 {% endfor %}
 
                 {% if page_obj.has_next %}
@@ -90,6 +94,7 @@
                         </a>
                     </li>
                 {% endif %}
+
             </ul>
         </nav>
     {% endif %}
