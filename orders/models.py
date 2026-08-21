@@ -76,6 +76,7 @@ class Product(models.Model):
     unit = models.CharField(max_length=5, default="")
     article = models.CharField(max_length=15, default="")  
     search_name = models.CharField(max_length=255, db_index=True, blank=True, editable=False)
+    count = models.IntegerField(default=0)
 
     def save(self, *args, **kwargs):
         # Автоматически переводим имя в нижний регистр перед сохранением

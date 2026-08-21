@@ -416,6 +416,7 @@ def save_product(request, product_id):
     name = data.get('name', '')
     article = data.get('article', '')
     unit = data.get('unit', '')
+    count = data.get('count', 0)
     
     if not product_id:
         return JsonResponse({'success': False, 'error': 'Поле external_id обязательно'}, status=500)  
@@ -425,7 +426,7 @@ def save_product(request, product_id):
     
     product, created = Product.objects.update_or_create(
         product_id=product_id,
-        defaults={'name': name, 'article': article, 'unit': unit})
+        defaults={'name': name, 'article': article, 'unit': unit, 'count': count})
     
     return JsonResponse({
         'success': True, 

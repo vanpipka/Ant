@@ -71,7 +71,7 @@ class OrderItemAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     # Поля, которые будут отображаться в списке товаров
-    list_display = ('product_id', 'name', 'unit', 'article')
+    list_display = ('product_id', 'name', 'unit', 'article', 'count')
     
     # Поля, по которым можно кликнуть для перехода к редактированию
     list_display_links = ('product_id', 'name')  
@@ -85,7 +85,7 @@ class ProductAdmin(admin.ModelAdmin):
     # Группировка полей в самой карточке товара
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'product_id', 'unit', 'article')
+            'fields': ('name', 'product_id', 'unit', 'article', 'count')
         }),
     )
     
