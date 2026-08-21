@@ -98,3 +98,7 @@ class ProductImageAdmin(admin.ModelAdmin):
 @admin.register(ClientPrice)
 class ClientPriceAdmin(admin.ModelAdmin):
     list_display = ('client', 'product', 'price')
+    
+    # Поиск по названию, внутреннему ID и имени клиента (через __name)
+    list_filter = ('client', )
+    search_fields = ('product__article', 'product__search_name')
