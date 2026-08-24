@@ -430,7 +430,7 @@ def save_product(request, product_id):
     article = data.get('article', '')
     unit = data.get('unit', '')
     count = data.get('count', 0)
-    count = data.get('deleted', False)
+    deleted = data.get('deleted', False)
     
     if not product_id:
         return JsonResponse({'success': False, 'error': 'Поле external_id обязательно'}, status=500)  
