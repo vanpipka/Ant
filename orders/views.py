@@ -316,8 +316,9 @@ def set_order_full(request):
 
                 order_items.append(OrderItem(
                     order=order,
-                    product_id=item.get('product_id'),
-                    name=item.get('name'),
+                    product_id=item.get('product_id', ''),
+                    product_code=item.get('product_code', ''),
+                    name=item.get('name', ''),
                     quantity=quantity,
                     price=price,
                     total=item_total
