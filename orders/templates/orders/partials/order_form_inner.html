@@ -123,6 +123,7 @@
                             <table class="table align-middle">
                                 <thead class="bg-light">
                                     <tr class="text-uppercase text-muted small fw-bold">
+                                        <th class="border-0 py-3">Код</th>
                                         <th class="border-0 py-3">Товар</th>
                                         <th class="border-0 py-3 text-center">Количество</th>
                                         <th class="border-0 py-3 text-end">Цена</th>
@@ -132,12 +133,12 @@
                                 </thead>
                                 <tbody id="order-items-container">
                                     <!-- Item 1 -->
-
-                                    
                                     {% for item in items %}
                                     <tr class="order-row">
                                         {% if order.status == 'draft' %} 
-                                        
+                                            <td>
+                                                <small class="text-muted">{{item.product_code}}</small>
+                                            </td>
                                             <td class="py-4">
                                                 
                                                 <small class="text-muted">{{item.name}}</small>
@@ -185,6 +186,9 @@
                                                 <i class="bi bi-trash trash-btn"></i>
                                             </td>
                                         {% else %}
+                                            <td class="py-4" style="max-width: 50pt;">
+                                                <small class="text-muted">{{item.product_code}}</small>
+                                            </td>
                                             <td class="py-4">
                                                 <small class="text-muted">{{item.name}}</small>
                                                 <input type="hidden" name="product_id" value="{{item.id}}">

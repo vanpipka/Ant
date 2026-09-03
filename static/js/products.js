@@ -203,6 +203,7 @@ const ProductCatalog = {
                         data-id="${product.product_id}"
                         data-name="${product.name}"
                         data-price="${product.client_price}"
+                        data-code="${product.article}"
                     >
                     <i class="bi bi-cart4 me-1"></i>
                         В заказ

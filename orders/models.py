@@ -55,18 +55,6 @@ class Order(models.Model):
         }
         # Если статус не найден в словаре, вернем 'draft' по умолчанию
         return mapping.get(self.status, "draft")
-    
-    
-class OrderItem(models.Model):
-    order = models.ForeignKey(Order, related_name="items", on_delete=models.CASCADE)
-
-    product_id = models.CharField(max_length=64)
-    name = models.CharField(max_length=255)
-
-    quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=12, decimal_places=2)
-
-    total = models.DecimalField(max_digits=12, decimal_places=2)
 
 
 class Product(models.Model):
@@ -87,7 +75,24 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+  
+  
+class OrderItem(models.Model):
     
+    order = models.ForeignKey(
+        Order, 
+        related_name="items", 
+        on_delete=models.CASCADE
+    )
+
+    product_id = models.CharField(max_length=64)   
+    product_code = models.CharField(max_length=64, default="")  
+    name = models.CharField(max_length=255)
+    quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+
+    total = models.DecimalField(max_digits=12, decimal_places=2)
+      
 
 class ProductImage(models.Model):
 
@@ -144,6 +149,7 @@ class ProductImage(models.Model):
         
         
 class ClientPrice(models.Model):
+    
     # Связь с клиентом
     client = models.ForeignKey(
         Client, 

@@ -195,6 +195,7 @@ async function loadProducts(query = '') {
                     data-id="${product.product_id}" 
                     data-name="${product.name}" 
                     data-price="${product.client_price}">
+                    data-code="${product.article}"> 
                         <i class="bi bi-cart4"></i>
                         В заказ
                 </button>
@@ -411,6 +412,7 @@ document.addEventListener('click', function(e) {
         const product = {
             id: btn.dataset.id,
             name: btn.dataset.name,
+            code: btn.dataset.code,
             price: parseFloat(btn.dataset.price),
             quantity: quantity
         };
@@ -458,6 +460,9 @@ document.addEventListener('click', function(e) {
         newRow.className = 'order-row';
 
         newRow.innerHTML = `
+            <td class="py-4">
+                <small class="text-muted">${product.code}</small>
+            </td>
             <td class="py-4">
                 <div class="fw-bold"></div>
                 <small class="text-muted">${product.name}</small>

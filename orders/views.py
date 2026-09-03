@@ -395,6 +395,7 @@ def save_order(request):
                 OrderItem.objects.create(
                     order=order,
                     product_id=product.product_id,
+                    product_code=product.article,
                     name=product.name,
                     quantity=qty,
                     price=price,
