@@ -80,6 +80,7 @@ class ProductListView(LoginRequiredMixin, ListView):
         # и сразу добавляем эту цену как виртуальное поле `client_price` к каждому объекту.
         queryset = Product.objects.filter(
             client_prices__client=current_client,
+            client_prices__price__gt=0,
             deleted=False,  # Фильтруем только активные продукты
         ).annotate(
             client_price=F('client_prices__price'),
@@ -193,7 +194,10 @@ def product_search_api(request):
         page_size = 20
         
     # Базовый кверисет активных товаров
-    products = Product.objects.filter(client_prices__client=client, deleted=False,)
+    products = Product.objects.filter(
+        client_prices__client=client, 
+        client_prices__price__gt=0,
+        deleted=False,)
     
     if query:
     # Ищем по имени или по артикулу (product_id)
