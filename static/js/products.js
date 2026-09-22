@@ -157,47 +157,34 @@ const ProductCatalog = {
                         class="img-fluid rounded-3 cp-zoom-trigger" 
                         alt="${product.name}"
                         style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;">`
-                : `<div class="d-flex align-items-center justify-content-center h-100 w-100 rounded-3" 
-                        style="background-color: #eaf7f7; color: #1abc9c;">
-                        <i class="bi bi-box-seam fs-4"></i>
-                   </div>`;
+                : `<i class="bi bi-box-seam"></i>`;
 
             const productHtml = `
-            <tr>
-                <td class="py-4">
-                    <div class="d-flex align-items-center">
-                        <div class="me-3 position-relative flex-shrink-0" style="width: 56px; height: 56px;">
+            <tr class="catalog-row">
+                <td class="td-icon d-md-none">
+                    <div class="product-img-box">
+                        ${imageBlock}
+                    </div>
+                </td>
+                <td class="td-info ps-md-3 py-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="product-img-box d-none d-md-flex">
                             ${imageBlock}
                         </div>
-
                         <div>
-                            <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.9rem;">
-                                ${product.name}
-                            </h6>
-                            <small class="text-muted">
-                                Арт: ${product.article} | Ед: ${product.unit}
-                            </small>
+                            <div class="product-title">${product.name}</div>
+                            <div class="product-meta">Арт: ${product.article} | Ед: ${product.unit}</div>
                         </div>
                     </div>
                 </td>
-                <td>
-                    <div class="qty-control mx-auto">
+                <!-- Mobile combined control bar -->
+                <td class="td-controls col-12 d-md-none">
+                    <div class="qty-control">
                         <button type="button" class="qty-btn">-</button>
                         <input type="text" name="item_quantity" class="qty-input" value="${qty}">
                         <button type="button" class="qty-btn">+</button>
                     </div>
-                </td>
-                        
-                <!-- Цена -->
-                <td class="text-end fw-bold text-muted ">
-                    <div class="order-unit-price">
-                        ${product.client_price} ₽
-                    </div>
-                    <input type="hidden" name="item_price" value="{{item.price}}">
-                </td>
-                          
-                <!--<td class="text-end fw-bold order-unit-amount">₽</td>  -->                                       
-                <td class="text-end">
+                    <div class="mobile-price-tag">${product.client_price} ₽</div>
                     <button
                         class="icon-link btn-new-invoice select-product-btn"
                         data-id="${product.product_id}"
@@ -205,6 +192,34 @@ const ProductCatalog = {
                         data-price="${product.client_price}"
                         data-code="${product.article}"
                     >
+                        <i class="bi bi-cart4 me-1"></i>
+                            В заказ
+                    </button>
+                </td>
+
+                <!-- Desktop View Cells -->
+                <td class="text-center d-none d-md-table-cell">
+                    <div class="qty-control">
+                        <button type="button" class="qty-btn">-</button>
+                        <input type="text" name="item_quantity" class="qty-input" value="${qty}">
+                        <button type="button" class="qty-btn">+</button>
+                    </div>
+                </td>
+                <td class="text-end fw-bold fs-6 text-dark d-none d-md-table-cell">
+                    <div class="order-unit-price">
+                        ${product.client_price} 
+                    </div>
+                    <input type="hidden" name="item_price" value="{{item.price}}">
+                </td>                                              
+                <td class="text-end pe-3 d-none d-md-table-cell">
+                
+                    <button
+                        class="icon-link btn-new-invoice select-product-btn"
+                        data-id="${product.product_id}"
+                        data-name="${product.name}"
+                        data-price="${product.client_price}"
+                        data-code="${product.article}"
+                    > 
                     <i class="bi bi-cart4 me-1"></i>
                         В заказ
                     </button>

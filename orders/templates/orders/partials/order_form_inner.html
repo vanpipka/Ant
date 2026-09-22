@@ -120,7 +120,7 @@
                         </div>
 
                         <div class="">
-                            <table class="table align-middle">
+                            <table class="table align-middle responsive-order-table mb-0">
                                 <thead class="bg-light">
                                     <tr class="text-uppercase text-muted small fw-bold">
                                         <th class="border-0 py-3">Код</th>
@@ -136,10 +136,10 @@
                                     {% for item in items %}
                                     <tr class="order-row">
                                         {% if order.status == 'draft' %} 
-                                            <td>
+                                            <td class="td-code">
                                                 <small class="text-muted">{{item.product_code}}</small>
                                             </td>
-                                            <td class="py-4">
+                                            <td class="py-md-4 td-title">
                                                 
                                                 <small class="text-muted">{{item.name}}</small>
                                                 <input type="hidden" name="item_product_id" value="{{item.product_id}}">
@@ -168,37 +168,48 @@
                                                 </div>
                                             -->
                                             </td>
-                                            <td>                                                                          
-                                                <div class="qty-control mx-auto">
+                                            <td class="td-qty">                                                                          
+                                                <div class="qty-control">
                                                     <button type="button" class="qty-btn">-</button>
                                                     <input type="text" name="item_quantity" class="qty-input" value="{{item.quantity}}">
                                                     <button type="button" class="qty-btn">+</button>
                                                 </div>                                                
                                             </td>
-                                            <td class="text-end fw-bold text-muted ">
-                                                <div class="order-unit-price">
-                                                    {{item.price}}₽
+                                            <td class="text-end fw-bold text-muted td-price-sum" colspan="2">
+                                                <div class="d-inline-flex align-items-center gap-1">
+                                                    <span class="mobile-label text-muted fw-normal">Цена:</span>
+                                                    <span class="order-unit-price">{{item.price}}₽</span>
+                                                    <input type="hidden" name="item_price" value="{{item.price}}">
                                                 </div>
-                                                <input type="hidden" name="item_price" value="{{item.price}}">
-                                            </td>
-                                            <td class="text-end fw-bold order-unit-amount">₽</td>                                         
-                                            <td class="text-end">
+                                                <span class="mobile-label text-muted fw-normal ms-1">/ Сумма:</span>
+                                                <span class="order-unit-amount text-dark ms-md-3">₽</span>
+                                            </td>                                       
+                                            <td class="text-end td-trash">
                                                 <i class="bi bi-trash trash-btn"></i>
                                             </td>
                                         {% else %}
-                                            <td class="py-4" style="max-width: 50pt;">
+                                            <td class="td-code" style="">
                                                 <small class="text-muted">{{item.product_code}}</small>
                                             </td>
-                                            <td class="py-4">
+                                            <td class="py-md-4 td-title">
                                                 <small class="text-muted">{{item.name}}</small>
                                                 <input type="hidden" name="product_id" value="{{item.id}}">
                                             </td>
-                                            <td class="text-center fw-bold text-muted order-unit-quantity">   
-                                                {{item.quantity}}                                                                                                                     
+                                            <td class="td-qty text-center fw-bold text-muted order-unit-quantity">   
+                                                <div class="d-inline-flex align-items-center gap-1">
+                                                    <span class="mobile-label text-muted fw-normal">Количество:</span>
+                                                    <span class="order-unit-price">{{item.quantity}}</span>
+                                                </div>                                                                                                                    
                                             </td>
-                                            <td class="text-end fw-bold text-muted order-unit-price">{{item.price}}₽</td>
-                                            <td class="text-end fw-bold order-unit-amount">{{item.total}}₽</td>
-                                            <td class="text-end"></td>
+                                            <td class="text-end fw-bold text-muted td-price-sum" colspan="2">
+                                                <div class="d-inline-flex align-items-center gap-1">
+                                                    <span class="mobile-label text-muted fw-normal">Цена:</span>
+                                                    <span class="order-unit-price">{{item.price}}₽</span>
+                                                </div>
+                                                <span class="mobile-label text-muted fw-normal ms-1">/ Сумма:</span>
+                                                <span class="order-unit-amount text-dark ms-md-3">{{item.total}}₽</span>
+                                            </td>
+                                            <td class="text-end td-trash"></td>
                                         {% endif %}
                                     </tr>    
                                     {% endfor %}

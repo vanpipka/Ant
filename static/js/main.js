@@ -460,16 +460,16 @@ document.addEventListener('click', function(e) {
         newRow.className = 'order-row';
 
         newRow.innerHTML = `
-            <td class="py-4">
+            <td class="td-code">
                 <small class="text-muted">${product.code}</small>
             </td>
-            <td class="py-4">
+            <td class="py-md-4 td-title">
                 <div class="fw-bold"></div>
                 <small class="text-muted">${product.name}</small>
                 <input type="hidden" name="item_product_id" value="${product.id}">
             </td>
 
-            <td>
+            <td class="td-qty">
                 <div class="qty-control mx-auto">
                     <button type="button" class="qty-btn">-</button>
                     <input type="text" name="item_quantity" class="qty-input" value="${product.quantity}">
@@ -477,16 +477,17 @@ document.addEventListener('click', function(e) {
                 </div>
             </td>
 
-            <td class="text-end fw-bold text-muted order-unit-price">
-                ${product.price.toFixed(2)}₽
-                <input type="hidden" name="item_price" value="${product.price}">
+            <td class="text-end fw-bold text-muted td-price-sum" colspan="2">
+                <div class="d-inline-flex align-items-center gap-1">
+                    <span class="mobile-label text-muted fw-normal">Цена:</span>
+                    <span class="order-unit-price">${product.price.toFixed(2)}₽</span>
+                    <input type="hidden" name="item_price" value="${product.price}">
+                </div>
+                <span class="mobile-label text-muted fw-normal ms-1">/ Сумма:</span>
+                <span class="order-unit-amount text-dark ms-md-3">${product.price.toFixed(2)}</span>
             </td>
 
-            <td class="text-end fw-bold order-unit-amount">
-                ${product.price.toFixed(2)}₽
-            </td>
-
-            <td class="text-end">
+            <td class="text-end td-trash">
                 <i class="bi bi-trash trash-btn"></i>
             </td>
         `;
