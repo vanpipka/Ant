@@ -61,11 +61,10 @@ class ProductListView(LoginRequiredMixin, ListView):
     paginate_by = 25 # Опционально: постраничный вывод
 
     def get_queryset(self):
-        # 1. Получаем текущего клиента через авторизованного юзера.
-        try:
-            current_client = self.request.user.clients.all()[0]
-        except AttributeError:
-            # Если у пользователя нет привязанного клиента, отдаем пустой список
+        # Получаем всех клиентов текущего пользователя 
+        clients = self.request.user.clients.all() 
+        # Если у пользователя нет клиентов — возвращаем пустой список 
+        if not clients.exists(): 
             return Product.objects.none()
         
         image_subquery = ProductImage.objects.filter(
@@ -79,7 +78,7 @@ class ProductListView(LoginRequiredMixin, ListView):
         # 2. Оптимальный вариант: Фильтруем продукты, у которых есть цена для клиента,
         # и сразу добавляем эту цену как виртуальное поле `client_price` к каждому объекту.
         queryset = Product.objects.filter(
-            client_prices__client=current_client,
+            client_prices__client__in=clients,
             client_prices__price__gt=0,
             deleted=False,  # Фильтруем только активные продукты
         ).annotate(
