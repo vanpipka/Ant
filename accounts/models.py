@@ -17,6 +17,15 @@ class Client(models.Model):
     
 class User(AbstractUser):
     external_id = models.CharField(max_length=64, unique=True, null=True, blank=True)
+    # Тип цены
+    price_type = models.ForeignKey(
+        "orders.PriceType",
+        on_delete=models.PROTECT,
+        related_name="users",
+        null=True,
+        blank=True,
+        verbose_name="Вид цен",
+    )
     # Теперь один пользователь может быть привязан к списку клиентов
     clients = models.ManyToManyField(
         Client, 

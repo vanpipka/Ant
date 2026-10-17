@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 import random
 
-from .models import Order, OrderItem
+from .models import Order, OrderItem, PriceType
 
 
 class OrderService:
@@ -147,3 +147,25 @@ def create_random_order(user, client):
     
     return order
         
+        
+def get_or_update_price_type(price_type_data):
+    """
+    Находит вид цен по external_id.
+    Если он существует — обновляет name.
+    Если не существует — создаёт новый.
+    """
+    if not isinstance(price_type_data, dict):
+        raise ValueError("price_type должен быть объектом с external_id и name")
+
+    external_id = price_type_data.get("external_id")
+    name = price_type_data.get("name")
+
+    if not external_id or not name:
+        raise ValueError("Для вида цен обязательны external_id и name")
+
+    price_type, created = PriceType.objects.update_or_create(
+        external_id=external_id,
+        defaults={"name": name},
+    )
+
+    return price_type

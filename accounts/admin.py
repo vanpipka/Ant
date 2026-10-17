@@ -23,6 +23,6 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = UserAdmin.fieldsets + (
         ('Доступы', {
-            'fields': ('clients', 'external_id'),
+            'fields': ('clients', 'external_id', 'price_type'),
         }),
     )

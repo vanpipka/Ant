@@ -9,13 +9,13 @@ from django.core.files.base import ContentFile
 from django.http import HttpResponseNotFound, JsonResponse
 from django.db.models import F, OuterRef, Subquery, Q
 from django.db import transaction
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 import json
 
 from accounts.models import Client
 from accounts.models import ClientAddress
-from orders.models import Order, OrderItem, Product, ProductImage, ClientPrice
+from orders.models import Order, OrderItem, Product, ProductImage, ClientPrice, ProductPrice, PriceType
 from .services import OrderService
 
 User = get_user_model()
@@ -657,3 +657,122 @@ def upload_product_image(request):
         'message': f'Image successfully added to product ID {product_id}',
         'image_id': new_image.id
     })
+    
+    
+@require_POST
+def sync_product_prices(request):
+    """Создание и обновление цен товаров. Записи не удаляются."""
+
+    try:
+        data = json.loads(request.body)
+
+        price_type_data = data.get("price_type")
+        items = data.get("items")
+
+        if not isinstance(price_type_data, dict):
+            return JsonResponse({
+                "success": False,
+                "error": "Поле price_type должно быть объектом",
+            }, status=400)
+
+        price_type_external_id = price_type_data.get("external_id")
+        price_type_name = price_type_data.get("name")
+
+        if not price_type_external_id or not price_type_name:
+            return JsonResponse({
+                "success": False,
+                "error": "Для price_type обязательны external_id и name",
+            }, status=400)
+
+        if not isinstance(items, list):
+            return JsonResponse({
+                "success": False,
+                "error": "Поле items должно быть списком",
+            }, status=400)
+
+        created_count = 0
+        updated_count = 0
+
+        with transaction.atomic():
+            # Создаём вид цены или обновляем его название
+            price_type, _ = PriceType.objects.update_or_create(
+                external_id=price_type_external_id,
+                defaults={"name": price_type_name},
+            )
+
+            for index, item in enumerate(items):
+                if not isinstance(item, dict):
+                    raise ValueError(
+                        f"Элемент items[{index}] должен быть объектом"
+                    )
+
+                product_external_id = item.get("product_external_id")
+                raw_price = item.get("price")
+
+                if not product_external_id:
+                    raise ValueError(
+                        f"В items[{index}] отсутствует product_external_id"
+                    )
+
+                if raw_price is None:
+                    raise ValueError(
+                        f"В items[{index}] отсутствует price"
+                    )
+
+                try:
+                    price = Decimal(str(raw_price))
+                except (InvalidOperation, ValueError):
+                    raise ValueError(
+                        f"Некорректная цена в items[{index}]"
+                    )
+
+                if not price.is_finite() or price < 0:
+                    raise ValueError(
+                        f"Цена в items[{index}] должна быть конечным неотрицательным числом"
+                    )
+
+                # Ищем товар по внешнему идентификатору из 1С
+                product = Product.objects.filter(external_id=product_external_id).first()
+
+                if product is None:
+                    raise ValueError(
+                        f"Товар с external_id={product_external_id} не найден"
+                    )
+
+                # Создаём новую цену или обновляем существующую
+                _, created = ProductPrice.objects.update_or_create(
+                    price_type=price_type,
+                    product=product,
+                    defaults={"price": price},
+                )
+
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
+
+        return JsonResponse({
+            "success": True,
+            "price_type_id": price_type.id,
+            "created": created_count,
+            "updated": updated_count,
+            "message": "Цены товаров успешно синхронизированы",
+        })
+
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({
+            "success": False,
+            "error": "Некорректный JSON",
+        }, status=400)
+
+    except ValueError as e:
+        return JsonResponse({
+            "success": False,
+            "error": str(e),
+        }, status=400)
+
+    except Exception:
+        return JsonResponse({
+            "success": False,
+            "error": "Внутренняя ошибка при синхронизации цен",
+        }, status=500)

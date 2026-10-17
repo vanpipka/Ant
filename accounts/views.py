@@ -8,6 +8,7 @@ from django.contrib import messages
 import json
 
 from accounts.models import Client, ClientAddress, User
+from orders.services import get_or_update_price_type
 
 
 def login_view(request):
@@ -59,12 +60,21 @@ def create_user_api(request):
         if User.objects.filter(username=username).exists():
             return JsonResponse({'success': False, 'error': f'user with username {username} exists'}, status=400)
 
-        user = User.objects.create_user(username=username, email=email, password=password, external_id=external_id)
-        
-        # Можно сразу добавить доп. поля (Имя, Фамилия)
-        user.first_name = data.get('first_name', '')
-        user.last_name = data.get('last_name', '')
-        user.save()
+        with transaction.atomic():
+            # Создаём или находим вид цен, если он передан
+            price_type = None
+            if data.get("price_type") is not None:
+                price_type = get_or_update_price_type(data["price_type"])
+
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                external_id=external_id,
+                price_type=price_type,
+                first_name=data.get("first_name", ""),
+                last_name=data.get("last_name", ""),
+            )
 
         return JsonResponse({'success': True, 'user_id': user.id})
     except Exception as e:
@@ -101,6 +111,18 @@ def update_user_api(request):
                 user.set_password(user_data['password'])
                 user.save()
 
+            if "price_type" in user_data:
+                price_type_data = user_data["price_type"]
+
+                if price_type_data is None:
+                    # Явный null означает убрать привязку
+                    user.price_type = None
+                    user.save(update_fields=["price_type"])
+                else:
+                    price_type = get_or_update_price_type(price_type_data)
+                    user.price_type = price_type
+                    user.save(update_fields=["price_type"])
+                    
             # 3. Обработка списка клиентов
             client_list = data.get('clients', [])
             current_client_ids = []
@@ -136,3 +158,7 @@ def update_user_api(request):
 
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+    
+    
+    

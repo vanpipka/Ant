@@ -186,3 +186,60 @@ class ClientPrice(models.Model):
 
     def __str__(self):
         return f"Цена для {self.client.name} на {self.product.name}: {self.price} руб."
+    
+    
+class PriceType(models.Model):
+    external_id = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name="ID вида цены в 1С",
+    )
+
+    name = models.CharField(
+        max_length=255,
+        verbose_name="Название вида цены",
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Вид цены"
+        verbose_name_plural = "Виды цен"
+        ordering = ["name"]
+        
+
+class ProductPrice(models.Model):
+    price_type = models.ForeignKey(
+        PriceType,
+        on_delete=models.PROTECT,
+        related_name="product_prices",
+        verbose_name="Вид цены",
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="prices",
+        verbose_name="Товар",
+    )
+
+    price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Цена",
+    )
+
+    class Meta:
+        verbose_name = "Цена товара"
+        verbose_name_plural = "Цены товаров"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["price_type", "product"],
+                name="unique_product_price_type",
+            ),
+        ]
+        ordering = ["product"]
+
+    def __str__(self):
+        return f"{self.product} — {self.price} ({self.price_type})"
