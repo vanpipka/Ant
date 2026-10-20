@@ -774,5 +774,5 @@ def sync_product_prices(request):
     except Exception:
         return JsonResponse({
             "success": False,
-            "error": "Внутренняя ошибка при синхронизации цен",
+            "error": str(e),
         }, status=500)
