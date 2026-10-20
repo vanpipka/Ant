@@ -732,7 +732,7 @@ def sync_product_prices(request):
                     )
 
                 # Ищем товар по внешнему идентификатору из 1С
-                product = Product.objects.filter(external_id=product_external_id).first()
+                product = Product.objects.filter(product_id=product_external_id).first()
 
                 if product is None:
                     raise ValueError(
