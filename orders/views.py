@@ -771,7 +771,7 @@ def sync_product_prices(request):
             "error": str(e),
         }, status=400)
 
-    except Exception:
+    except Exception as e:
         return JsonResponse({
             "success": False,
             "error": str(e),
