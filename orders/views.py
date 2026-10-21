@@ -61,10 +61,10 @@ class ProductListView(LoginRequiredMixin, ListView):
     paginate_by = 25 # Опционально: постраничный вывод
 
     def get_queryset(self):
-        # Получаем всех клиентов текущего пользователя 
-        clients = self.request.user.clients.all() 
+        # Получаем тип цены для пользователя
+        price_type = self.request.user.price_type
         # Если у пользователя нет клиентов — возвращаем пустой список 
-        if not clients.exists(): 
+        if price_type is None: 
             return Product.objects.none()
         
         image_subquery = ProductImage.objects.filter(
@@ -78,11 +78,12 @@ class ProductListView(LoginRequiredMixin, ListView):
         # 2. Оптимальный вариант: Фильтруем продукты, у которых есть цена для клиента,
         # и сразу добавляем эту цену как виртуальное поле `client_price` к каждому объекту.
         queryset = Product.objects.filter(
-            client_prices__client__in=clients,
-            client_prices__price__gt=0,
+            count__gt=0,
+            prices__price_type=price_type,
+            prices__price__gt=0,
             deleted=False,  # Фильтруем только активные продукты
         ).annotate(
-            client_price=F('client_prices__price'),
+            client_price=F('prices__price'),
             # Добавляем динамические поля (строки с относительным путем к файлам медиа)
             annotated_image=Subquery(image_subquery),
             annotated_preview=Subquery(preview_subquery)
