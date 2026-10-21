@@ -15,12 +15,12 @@ import json
 
 from accounts.models import Client
 from accounts.models import ClientAddress
-from orders.models import Order, OrderItem, Product, ProductImage, ClientPrice, ProductPrice, PriceType
+from orders.models import Order, OrderItem, Product, ProductImage, ProductPrice, PriceType
 from .services import OrderService
 
 User = get_user_model()
 
-
+ 
 class OrderListView(LoginRequiredMixin, ListView):
     model = Order
     template_name = 'orders/order_list.html' # Путь к вашему шаблону
@@ -123,6 +123,8 @@ def order_modal_handler(request, pk=None):
     
     if clients.count() == 1:
         order.client = clients[0]
+        
+    price_type = request.user.price_type
 
     if request.GET.get('copy') == 'true' and pk:
         # Режим копирования
@@ -130,7 +132,7 @@ def order_modal_handler(request, pk=None):
         for i in order.items.all():
             
             try:
-                product = ClientPrice.objects.filter(client_id=order.client_id, product__product_id=i.product_id).first()
+                product = ProductPrice.objects.filter(price_type=price_type, product__product_id=i.product_id).first()
                 if product:  
                     i.price = product.price
                     i.total = i.price * i.quantity           
@@ -180,10 +182,10 @@ def product_search_api(request):
     page_number = request.GET.get('page', 1) # Получаем параметры пагинации из URL (например: /api/products/?page=2&page_size=20)
     page_size = request.GET.get('page_size', 20) # По умолчанию 20 товаров на страницу
     
-    try:       
-        client = request.user.clients.all().filter(id=client_id)[0]
-    except AttributeError:
-        return JsonResponse({'error': 'User is not associated with any client'}, status=400)   
+    price_type = request.user.price_type
+    
+    if price_type is None:         
+        return JsonResponse({'error': 'User does not have price type'}, status=400)   
     
     # Защита от некорректного ввода page_size
     try:
@@ -195,9 +197,10 @@ def product_search_api(request):
         
     # Базовый кверисет активных товаров
     products = Product.objects.filter(
-        client_prices__client=client, 
-        client_prices__price__gt=0,
-        deleted=False,)
+        count__gt=0,
+        prices__price_type=price_type,
+        prices__price__gt=0,
+        deleted=False, )
     
     if query:
     # Ищем по имени или по артикулу (product_id)
@@ -206,17 +209,12 @@ def product_search_api(request):
             Q(article__icontains=query)
         )
         
-    #image_subquery = ProductImage.objects.filter(
-    #        product_id=OuterRef('product_id')
-    #    ).values('image')[:1]
-        
     preview_subquery = ProductImage.objects.filter(
             product_id=OuterRef('product_id')
         ).values('preview_img')[:1]
     
     products = products.annotate(
-        client_price=F('client_prices__price'),
-        #annotated_image=Subquery(image_subquery),
+        client_price=F('prices__price'),
         annotated_preview=Subquery(preview_subquery)
     ).values(
         'id',             # Внутренний ID Django (число)
@@ -458,65 +456,11 @@ def save_product(request, product_id):
 @require_POST
 def set_client_prices(request, client_id):
 
-    if not request.user.is_staff:
-        return JsonResponse(
-            {'success': False, 'error': 'Доступ запрещен'},
-            status=403
-        )
-
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse(
-            {'success': False, 'error': 'Ошибка формата JSON'},
-            status=400
-        )
-    except Exception as e:
-        return JsonResponse(
-            {'success': False, 'error': str(e)},
-            status=500
-        )
-
-    items = data.get("items", [])
-
-    try:
-        client = Client.objects.get(external_id=client_id)
-    except Client.DoesNotExist:
-        return JsonResponse(
-            {
-                'success': False,
-                'error': f'Клиент {client_id} не найден'
-            },
-            status=404
-        )
-
-    with transaction.atomic():
-
-        for item in items:
-
-            product_id = item.get("product_id")
-
-            if not product_id:
-                continue
-
-            try:
-                product = Product.objects.get(product_id=product_id)
-            except Product.DoesNotExist:
-                continue
-
-            obj, created = ClientPrice.objects.update_or_create(
-                client=client,
-                product=product,
-                defaults={
-                    "price": Decimal(str(item.get("price", 0)))
-                }
+    return JsonResponse(
+                {'success': False, 'error': 'Not available'},
+                status=403
             )
-
-    return JsonResponse({
-        'success': True, 
-        'message': f'Синхронизация завершена.'
-    })
- 
+     
     
 @login_required # Обязательно защищаем данные
 def export_orders_to_1c(request):
