@@ -61,6 +61,7 @@
                 <div class="invoice-container">
                 
                     <form method="post" name="order-main-form" id="order-main-form" action="/orders/save/">
+                        <input type="hidden" name="manager_contact" id="final-manager-contact">
                         <input type="hidden" name="status" id="final-status" value="draft">
                         <input type="hidden" name="order_id" id="current_order_id" value="{% if order.id %}{{order.id}}{% endif %}">
                         {% csrf_token %}
@@ -309,6 +310,29 @@
             <div class="modal-body text-center py-4">
                 <i class="bi bi-question-circle text-primary" style="font-size: 3rem;"></i>
                 <p class="mt-3 fs-5">Как вы хотите сохранить этот заказ?</p>
+                <!-- Контакт менеджера -->
+                <div class="mt-4 text-start">
+                    <label for="manager-contact" class="form-label fw-semibold">
+                        Контакт менеджера
+                        <span class="text-danger" id="manager-contact-required" style="display: none;">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="manager-contact"
+                        name="manager_contact"
+                        placeholder="Введите имя, телефон или Telegram"
+                    >
+
+                    <div class="form-text">
+                        Обязательно при отправке заказа в обработку.
+                    </div>
+
+                    <div class="invalid-feedback">
+                        Укажите контакт менеджера.
+                    </div>
+                </div>
             </div>
             <div class="modal-footer border-0 justify-content-center pb-4">
                 <button type="button" class="btn btn-outline-secondary px-4" id="save-as-draft">

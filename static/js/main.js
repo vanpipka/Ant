@@ -400,14 +400,13 @@ document.addEventListener('click', function(e) {
         // получаем текущую строку
         const row = btn.closest('tr');
 
-        // получаем input количества
-        const qtyInput = row.querySelector('input[name="item_quantity"]');
+        // получаем input количества, берем именно видимый элемент
+        const inputs = row.querySelectorAll('.qty-input');
+        const qtyInput = [...inputs].find(el => el.getClientRects().length > 0);
+
 
         // значение количества
         const quantity = parseInt(qtyInput.value) || 1;
-
-        // возвращаем количество к исходной единичке
-        qtyInput.value = 1;
 
         const product = {
             id: btn.dataset.id,
@@ -416,6 +415,11 @@ document.addEventListener('click', function(e) {
             price: parseFloat(btn.dataset.price),
             quantity: quantity
         };
+
+        // возвращаем количество к исходной единичке
+        qtyInput.value = 1;
+
+        console.log(product);
 
         const tbody = document.querySelector('#order-items-container');
 
@@ -601,35 +605,68 @@ document.addEventListener('submit', function(event) {
 
         const confirmModal = new bootstrap.Modal(document.getElementById('confirmSaveModal'));
 
-        // Если все ок, форма отправится и дальше уже будет обработана на сервере
+        const managerContactInput = document.getElementById('manager-contact');
+        const finalManagerContact = document.getElementById('final-manager-contact');
+        const finalStatusInput = document.getElementById('final-status');
+
+
+        // Показываем окно выбора перед отправкой формы
         if (!event.detail || !event.detail.confirmed) {
-         
+
             if (!confirmModal) return;
 
-            event.preventDefault(); // Останавливаем отправку
-            
-            // Здесь можно добавить вашу проверку (например, выбран ли адрес)
+            event.preventDefault();
+
             const address = document.getElementById('address-select').value;
+
             if (!address) {
                 appendAlert('Сначала выберите адрес!', 'danger');
                 return;
             }
 
-            confirmModal.show(); // Показываем окно выбора
+            confirmModal.show();
         }
 
-        // 2. Обработка кнопки "Как черновик"
+
+        // Обработка кнопки "Как черновик"
         document.getElementById('save-as-draft').addEventListener('click', function() {
-            const finalStatusInput = document.getElementById('final-status');
+
             finalStatusInput.value = 'draft';
+
+            // Контакт необязателен
+            finalManagerContact.value = managerContactInput.value.trim();
+
             submitForm(confirmModal);
         });
 
-        // 3. Обработка кнопки "В обработку"
+
+        // Обработка кнопки "В обработку"
         document.getElementById('save-as-confirmed').addEventListener('click', function() {
-            const finalStatusInput = document.getElementById('final-status');
-            finalStatusInput.value = 'sent'; 
+
+            const contact = managerContactInput.value.trim();
+
+            // Проверяем обязательность контакта
+            if (!contact) {
+                managerContactInput.classList.add('is-invalid');
+                managerContactInput.focus();
+                return;
+            }
+
+            managerContactInput.classList.remove('is-invalid');
+
+            finalStatusInput.value = 'sent';
+
+            finalManagerContact.value = contact;
+
             submitForm(confirmModal);
+        });
+
+
+        // Убираем ошибку при вводе
+        managerContactInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
         });
 
     }

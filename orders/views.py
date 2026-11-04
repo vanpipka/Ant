@@ -178,7 +178,6 @@ def get_addresses(request):
 def product_search_api(request):
     
     query = request.GET.get('q', '').strip().lower()
-    client_id = request.GET.get('client_id', '').strip().lower()
     page_number = request.GET.get('page', 1) # Получаем параметры пагинации из URL (например: /api/products/?page=2&page_size=20)
     page_size = request.GET.get('page_size', 20) # По умолчанию 20 товаров на страницу
     
@@ -352,6 +351,7 @@ def save_order(request):
         status = request.POST.get('status', 'draft') 
         payment_type = request.POST.get('paymenttype_id', 0) 
         its_backround_submit = request.POST.get('its_backround_submit', False) 
+        manager_contact = request.POST.get('manager_contact', '').strip()
         
         if not address:
             address = request.POST.get('address', '')
@@ -365,7 +365,8 @@ def save_order(request):
                 description = description,
                 address = address, # Или текстовое поле
                 status = status,
-                payment_type = payment_type
+                payment_type = payment_type,
+                manager_contact=manager_contact
             )
         else:
             # Обновляем существующий заказ
@@ -375,6 +376,7 @@ def save_order(request):
             order.description = description
             order.status = status
             order.payment_type = payment_type
+            order.manager_contact=manager_contact
             order.items.all().delete() # Удаляем старые позиции, чтобы записать новые
             
 
@@ -492,6 +494,7 @@ def export_orders_to_1c(request):
             'user_id': order.user.external_id if order.user else None,
             'client_id': order.client.external_id,
             'address': order.address,
+            'manager_contact': order.manager_contact,            
             'total_amount': float(order.total_amount),
             'description': order.description or "",
             'items': order_items, # Вложенный список товаров

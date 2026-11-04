@@ -29,9 +29,8 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
     payment_type = models.IntegerField(choices=PaymentType.choices, default=PaymentType.TRANSFER)
     description = models.TextField(blank=True, default="")
-
+    manager_contact = models.CharField(max_length=255, blank=True, default="", verbose_name="Контакт менеджера")
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
